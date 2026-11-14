@@ -1,19 +1,44 @@
+import * as Dialog from '@radix-ui/react-dialog'
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, ArrowRight, ArrowDownUp, Building2, History, RefreshCw, Send, ShieldCheck, Smartphone } from 'lucide-react'
+import {
+  ArrowLeft,
+  ArrowRight,
+  ArrowDownUp,
+  Building2,
+  History,
+  RefreshCw,
+  Send,
+  ShieldCheck,
+  Smartphone,
+} from 'lucide-react'
 import { CountryCombobox } from '../components/calculator/CountryCombobox'
 import { AmountField } from '../components/calculator/AmountField'
 import { TransferSummary } from '../components/calculator/TransferSummary'
 import { useExchangeRates } from '../hooks/useExchangeRates'
 import { banks, ewallets, calculateFee } from '../mock/providers'
-import { transferSchema, type TransferFormValues } from '../schemas/transfer.schema'
+import { transferSchema } from '../schemas/transfer.schema'
+import type { TransferFormValues } from '../schemas/transfer.schema'
 import { useTransferStore } from '../stores/transfer.store'
-import { convertAmount, formatAmount, formatInputAmount, parseAmount } from '../lib/utils/money'
-import type { TransferService, TransferSpeed } from '../lib/types'
+import {
+  convertAmount,
+  formatAmount,
+  formatInputAmount,
+  parseAmount,
+} from '../lib/utils/money'
 
 export const Route = createFileRoute('/')({ component: CalculatorPage })
+
+const fieldLabelClassName =
+  'mb-[6px] flex items-center justify-between gap-3 text-[12px] font-extrabold text-gray-900 md:mb-[7px] md:text-[13px]'
+const speedOptionClassName =
+  'min-h-[49px] rounded-pill border border-transparent bg-transparent text-[12px] font-extrabold text-gray-700 aria-pressed:border-gray-100 aria-pressed:bg-white aria-pressed:text-gray-900 aria-pressed:shadow-segment md:min-h-[42px] md:text-[14px]'
+const deliveryOptionClassName =
+  'group grid min-h-[58px] grid-cols-[32px_1fr_20px] items-center gap-[10px] rounded-control border border-gray-100 bg-white px-3 py-[9px] text-left text-gray-900 aria-pressed:border-[1.5px] aria-pressed:border-primary-500 aria-pressed:bg-surface-selected aria-pressed:px-[11.5px] aria-pressed:py-[8.5px] contrast-more:border-gray-700 md:flex md:min-h-[120px] md:flex-col md:items-stretch md:gap-2 md:p-[14px] md:aria-pressed:p-[13.5px]'
+const deliveryIndicatorClassName =
+  'col-start-3 row-span-2 row-start-1 size-[19px] rounded-full border-[1.5px] border-blue-200 group-aria-pressed:border-2 group-aria-pressed:border-primary-600 group-aria-pressed:bg-primary-600 group-aria-pressed:shadow-[inset_0_0_0_4px_white]'
 
 function CalculatorPage() {
   const destination = useTransferStore((state) => state.destination)
@@ -31,19 +56,33 @@ function CalculatorPage() {
   const setReceiveAmount = useTransferStore((state) => state.setReceiveAmount)
   const setDerivedAmount = useTransferStore((state) => state.setDerivedAmount)
 
-  const { data: rates, isLoading: ratesLoading, isError: ratesError, refetch } = useExchangeRates()
-  const rate = destination?.currencyCode ? rates?.[destination.currencyCode] : undefined
+  const {
+    data: rates,
+    isLoading: ratesLoading,
+    isError: ratesError,
+    refetch,
+  } = useExchangeRates()
+  const rate = destination?.currencyCode
+    ? rates?.[destination.currencyCode]
+    : undefined
   const supported = Boolean(destination?.currencyCode && rate)
   const providers = service === 'bank' ? banks : ewallets
-  const provider = providers.find((item) => item.id === providerId) ?? providers[0]
+  const provider =
+    providers.find((item) => item.id === providerId) ?? providers[0]
   const sendAmount = parseAmount(sendAmountText)
   const receiveAmount = parseAmount(receiveAmountText)
   const fee = calculateFee(provider, speed, sendAmount)
   const total = sendAmount + fee
 
-  const { setValue, formState: { errors } } = useForm<TransferFormValues>({
+  const {
+    setValue,
+    formState: { errors },
+  } = useForm<TransferFormValues>({
     resolver: zodResolver(transferSchema),
-    defaultValues: { sendAmount: sendAmountText, receiveAmount: receiveAmountText },
+    defaultValues: {
+      sendAmount: sendAmountText,
+      receiveAmount: receiveAmountText,
+    },
     mode: 'onChange',
   })
 
@@ -60,7 +99,14 @@ function CalculatorPage() {
       const converted = convertAmount(receiveAmount, rate, 'from')
       setDerivedAmount('receive', converted > 0 ? formatAmount(converted) : '')
     }
-  }, [destination?.currencyCode, lastEdited, rate, sendAmount, receiveAmount, setDerivedAmount])
+  }, [
+    destination?.currencyCode,
+    lastEdited,
+    rate,
+    sendAmount,
+    receiveAmount,
+    setDerivedAmount,
+  ])
 
   useEffect(() => {
     setValue('sendAmount', sendAmountText, { shouldValidate: true })
@@ -69,19 +115,28 @@ function CalculatorPage() {
 
   const [activeField, setActiveField] = useState<'send' | 'receive'>('send')
   const [historyOpen, setHistoryOpen] = useState(false)
-  const canContinue = Boolean(destination && supported && sendAmount > 0 && provider)
+  const historyTriggerRef = useRef<HTMLButtonElement | null>(null)
+  const canContinue = Boolean(
+    destination && supported && sendAmount > 0 && provider,
+  )
 
   const handleSendChange = (value: string) => {
     const formatted = formatInputAmount(value)
     setActiveField('send')
-    setValue('sendAmount', formatted, { shouldValidate: true, shouldDirty: true })
+    setValue('sendAmount', formatted, {
+      shouldValidate: true,
+      shouldDirty: true,
+    })
     setSendAmount(formatted)
   }
 
   const handleReceiveChange = (value: string) => {
     const formatted = formatInputAmount(value)
     setActiveField('receive')
-    setValue('receiveAmount', formatted, { shouldValidate: true, shouldDirty: true })
+    setValue('receiveAmount', formatted, {
+      shouldValidate: true,
+      shouldDirty: true,
+    })
     setReceiveAmount(formatted)
   }
 
@@ -92,84 +147,154 @@ function CalculatorPage() {
 
   const handleContinue = () => {
     if (!canContinue) return
-    window.alert('Page 1 calculator is ready. Recipient and review pages are outside this milestone.')
+    window.alert(
+      'Page 1 calculator is ready. Recipient and review pages are outside this milestone.',
+    )
   }
 
   const heading = (
-    <div className="page-heading">
-      <h1 className="page-title">How much are you sending?</h1>
-      <p className="page-subtitle">
-        Enter an amount in rupiah and we’ll show exactly what lands in your recipient’s account, fees included.
+    <div className="w-full">
+      <h1 className="m-0 mb-[15px] text-[25px] leading-[1.22] font-extrabold tracking-[-0.5px] md:mb-1 md:text-[clamp(25px,3vw,31px)] md:leading-[1.2] md:tracking-[-0.7px]">
+        How much are you sending?
+      </h1>
+      <p className="m-0 mb-6 hidden text-[15px] leading-[1.55] text-gray-700 md:block">
+        Enter an amount in rupiah and we’ll show exactly what lands in your
+        recipient’s account, fees included.
       </p>
     </div>
   )
 
   return (
     <>
-      <header className="app-header">
-        <div className="header-inner">
-          <a className="brand" href="/" aria-label="Inter home">
-            <span className="brand-mark"><Send size={19} /></span>
+      <header className="hidden h-[73px] border-b border-gray-100 md:block">
+        <div className="mx-auto grid h-full w-[min(100%-40px,1254px)] grid-cols-3 items-center">
+          <a
+            className="inline-flex items-center gap-[9px] text-[21px] font-black text-gray-900 no-underline"
+            href="/"
+            aria-label="Inter home"
+          >
+            <span className="grid size-[33px] place-items-center rounded-[11px] bg-primary-500 text-white">
+              <Send size={19} />
+            </span>
             Inter
           </a>
-          <button type="button" className="header-history" onClick={() => setHistoryOpen(true)}>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 justify-self-center border-0 bg-transparent p-2 text-gray-700 hover:text-primary-600"
+            onClick={(event) => {
+              historyTriggerRef.current = event.currentTarget
+              setHistoryOpen(true)
+            }}
+          >
             <History size={16} /> History
           </button>
-          <div className="header-right" aria-label="Sending currency">
-            <span className="currency-pill neutral">IDR · Indonesia</span>
+          <div
+            className="flex items-center gap-3 justify-self-end"
+            aria-label="Sending currency"
+          >
+            <span className="shrink-0 rounded-pill border border-gray-100 bg-white px-3 py-2 text-[12px] font-extrabold text-gray-700">
+              IDR · Indonesia
+            </span>
           </div>
         </div>
       </header>
 
-      <main className="page-shell">
-        <div className="mobile-header">
-          <button type="button" className="icon-button" aria-label="Back" onClick={() => window.history.back()}>
+      <main className="mx-auto w-[min(100%-40px,520px)] md:w-[min(100%-40px,1400px)]">
+        <div className="grid h-[76px] grid-cols-[40px_1fr_40px] items-center md:hidden">
+          <button
+            type="button"
+            className="grid size-9 place-items-center rounded-[11px] border border-gray-100 bg-white text-gray-900"
+            aria-label="Back"
+            onClick={() => window.history.back()}
+          >
             <ArrowLeft size={18} />
           </button>
-          <h2>Send money</h2>
-          <button type="button" className="icon-button" aria-label="History" onClick={() => setHistoryOpen(true)}>
+          <h2 className="m-0 text-center text-[16px] font-extrabold">
+            Send money
+          </h2>
+          <button
+            type="button"
+            className="grid size-9 place-items-center rounded-[11px] border border-gray-100 bg-white text-gray-900"
+            aria-label="History"
+            onClick={(event) => {
+              historyTriggerRef.current = event.currentTarget
+              setHistoryOpen(true)
+            }}
+          >
             <History size={18} />
           </button>
         </div>
 
-        <div className="mobile-progress">
-          <div className="mobile-progress-top"><span>Step 1 of 3</span><strong>Amount</strong></div>
-          <div className="progress-track"><div className="progress-fill" /></div>
+        <div className="mb-5 md:hidden">
+          <div className="mb-2 flex justify-between text-[12px] text-gray-400">
+            <span>Step 1 of 3</span>
+            <strong className="text-primary-600">Amount</strong>
+          </div>
+          <div className="h-1 overflow-hidden rounded-[99px] bg-gray-100">
+            <div className="h-full w-[33.333%] rounded-[inherit] bg-primary-600" />
+          </div>
         </div>
 
-        <div className="calculator-grid">
-          <div className="calculator-main">
-            <nav className="steps" aria-label="Transfer progress">
-              <span className="step active"><span className="step-number">1</span> Amount</span>
-              <span className="step-line" />
-              <span className="step"><span className="step-number">2</span> Recipient</span>
-              <span className="step-line" />
-              <span className="step"><span className="step-number">3</span> Review</span>
+        <div className="flex flex-col items-stretch gap-[19px] pt-0 pb-7 md:grid md:grid-cols-[minmax(0,1fr)_382px] md:items-start md:gap-[52px] md:pt-[38px] md:pb-14">
+          <div className="contents min-w-0 md:block">
+            <nav
+              className="mb-6 hidden items-center gap-[10px] text-gray-400 md:flex"
+              aria-label="Transfer progress"
+            >
+              <span className="inline-flex items-center gap-2 rounded-[99px] border border-primary-500 py-1 pr-[10px] pl-1 text-[13px] whitespace-nowrap text-primary-600">
+                <span className="grid size-[22px] place-items-center rounded-full bg-primary-500 text-[11px] font-extrabold text-white">
+                  1
+                </span>{' '}
+                Amount
+              </span>
+              <span className="h-px w-[22px] bg-blue-200" />
+              <span className="inline-flex items-center gap-2 text-[13px] whitespace-nowrap">
+                <span className="grid size-[22px] place-items-center rounded-full bg-gray-100 text-[11px] font-extrabold text-gray-500">
+                  2
+                </span>{' '}
+                Recipient
+              </span>
+              <span className="h-px w-[22px] bg-blue-200" />
+              <span className="inline-flex items-center gap-2 text-[13px] whitespace-nowrap">
+                <span className="grid size-[22px] place-items-center rounded-full bg-gray-100 text-[11px] font-extrabold text-gray-500">
+                  3
+                </span>{' '}
+                Review
+              </span>
             </nav>
 
             {heading}
 
-            <section className="country-block">
-              <label className="field-label">Destination country</label>
+            <section className="w-full">
+              <label
+                className={fieldLabelClassName}
+                htmlFor="destination-country"
+              >
+                Destination country
+              </label>
               <CountryCombobox value={destination} onChange={setDestination} />
             </section>
 
             <AmountField
               label="You send"
+              variant="send"
               value={sendAmountText}
               currency="IDR"
-              balance={undefined}
               disabled={!supported}
               active={activeField === 'send'}
               onChange={handleSendChange}
             />
 
-            <div className="swap-row">
+            <div className="mt-[7px] flex h-[34px] items-center">
               <button
                 type="button"
-                className="swap-button"
+                className="grid size-9 place-items-center rounded-full border border-gray-100 bg-white text-gray-700 shadow-control"
                 aria-label="Switch active amount field"
-                onClick={() => setActiveField((current) => current === 'send' ? 'receive' : 'send')}
+                onClick={() =>
+                  setActiveField((current) =>
+                    current === 'send' ? 'receive' : 'send',
+                  )
+                }
               >
                 <ArrowDownUp size={17} />
               </button>
@@ -178,6 +303,7 @@ function CalculatorPage() {
             <AmountField
               label="Recipient gets"
               value={receiveAmountText}
+              variant="receive"
               currency={currency}
               status={supported ? 'Rate available' : undefined}
               disabled={!supported}
@@ -186,62 +312,138 @@ function CalculatorPage() {
             />
 
             {destination && !supported && (
-              <p className="status-message" role="status">
-                {ratesLoading ? 'Loading exchange rates...' : ratesError ? 'Exchange rates could not be loaded. Please retry.' : 'This destination currency is not supported by the current exchange-rate provider.'}
-                {ratesError && <button type="button" onClick={() => void refetch()}> Retry</button>}
+              <p className="mt-2 text-[12px] text-red-500" role="status">
+                {ratesLoading
+                  ? 'Loading exchange rates...'
+                  : ratesError
+                    ? 'Exchange rates could not be loaded. Please retry.'
+                    : 'This destination currency is not supported by the current exchange-rate provider.'}
+                {ratesError && (
+                  <button type="button" onClick={() => void refetch()}>
+                    {' '}
+                    Retry
+                  </button>
+                )}
               </p>
             )}
 
-            <div className="rate-strip">
-              <RefreshCw size={14} color="#1970f0" />
-              <strong>{exchangeLabel}</strong>
-              <span>{ratesLoading ? 'Loading rate...' : ratesError ? 'Rate unavailable' : 'Rate from Frankfurter'}</span>
-              <button type="button" onClick={() => void refetch()} disabled={ratesLoading}>Refresh</button>
+            <div className="mt-[17px] flex min-h-9 w-full items-center gap-2 rounded-[10px] bg-surface px-[11px] py-[7px] text-[11px] text-gray-400 md:mt-6 md:min-h-[39px] md:px-[13px] md:py-2 md:text-[12px]">
+              <RefreshCw size={14} className="shrink-0 text-primary-600" />
+              <strong className="font-extrabold text-gray-900">
+                {exchangeLabel}
+              </strong>
+              <span>
+                {ratesLoading
+                  ? 'Loading rate...'
+                  : ratesError
+                    ? 'Rate unavailable'
+                    : 'Rate from Frankfurter'}
+              </span>
+              <button
+                type="button"
+                className="ml-auto border-0 bg-transparent font-bold text-primary-600"
+                onClick={() => void refetch()}
+                disabled={ratesLoading}
+              >
+                Refresh
+              </button>
             </div>
 
-            <section className="option-section">
-              <label className="field-label">Transfer speed</label>
-              <div className="segmented" role="group" aria-label="Transfer speed">
-                <button type="button" aria-pressed={speed === 'instant'} onClick={() => setSpeed('instant' as TransferSpeed)}>
-                  Instant <span>~30 minutes</span>
+            <section className="mt-[19px] w-full md:mt-[25px]">
+              <label className={fieldLabelClassName}>Transfer speed</label>
+              <div
+                className="grid grid-cols-2 gap-[5px] rounded-xl bg-surface p-1"
+                role="group"
+                aria-label="Transfer speed"
+              >
+                <button
+                  type="button"
+                  className={speedOptionClassName}
+                  aria-pressed={speed === 'instant'}
+                  onClick={() => setSpeed('instant')}
+                >
+                  Instant{' '}
+                  <span className="ml-0 block text-[11px] font-medium text-gray-400 md:ml-[7px] md:inline md:text-[12px]">
+                    ~30 minutes
+                  </span>
                 </button>
-                <button type="button" aria-pressed={speed === 'regular'} onClick={() => setSpeed('regular' as TransferSpeed)}>
-                  Regular <span>1–2 days</span>
+                <button
+                  type="button"
+                  className={speedOptionClassName}
+                  aria-pressed={speed === 'regular'}
+                  onClick={() => setSpeed('regular')}
+                >
+                  Regular{' '}
+                  <span className="ml-0 block text-[11px] font-medium text-gray-400 md:ml-[7px] md:inline md:text-[12px]">
+                    1–2 days
+                  </span>
                 </button>
               </div>
             </section>
 
-            <section className="option-section">
-              <label className="field-label">Delivery method</label>
-              <div className="service-grid" role="group" aria-label="Delivery method">
-                <button type="button" className={`service-card ${service === 'bank' ? 'selected' : ''}`} aria-pressed={service === 'bank'} onClick={() => setService('bank' as TransferService)}>
-                  <span className="service-card-top">
-                    <span className="service-icon"><Building2 size={17} /></span>
-                    <span className="radio-indicator" />
+            <section className="mt-[19px] w-full md:mt-[25px]">
+              <label className={fieldLabelClassName}>Delivery method</label>
+              <div
+                className="grid grid-cols-1 gap-[7px] md:grid-cols-2 md:gap-[10px]"
+                role="group"
+                aria-label="Delivery method"
+              >
+                <button
+                  type="button"
+                  className={deliveryOptionClassName}
+                  aria-pressed={service === 'bank'}
+                  onClick={() => setService('bank')}
+                >
+                  <span className="contents items-center justify-between md:flex">
+                    <span className="row-span-2 grid size-8 place-items-center rounded-pill bg-surface-icon text-primary-600">
+                      <Building2 size={17} />
+                    </span>
+                    <span className={deliveryIndicatorClassName} />
                   </span>
-                  <strong>Bank transfer</strong>
-                  <small>Deposit directly into a bank account</small>
+                  <strong className="self-end text-[13px] font-extrabold md:self-auto md:text-[14px]">
+                    Bank transfer
+                  </strong>
+                  <small className="self-start text-[11px] text-gray-400 md:self-auto md:text-[12px]">
+                    Deposit directly into a bank account
+                  </small>
                 </button>
-                <button type="button" className={`service-card ${service === 'ewallet' ? 'selected' : ''}`} aria-pressed={service === 'ewallet'} onClick={() => setService('ewallet' as TransferService)}>
-                  <span className="service-card-top">
-                    <span className="service-icon"><Smartphone size={17} /></span>
-                    <span className="radio-indicator" />
+                <button
+                  type="button"
+                  className={deliveryOptionClassName}
+                  aria-pressed={service === 'ewallet'}
+                  onClick={() => setService('ewallet')}
+                >
+                  <span className="contents items-center justify-between md:flex">
+                    <span className="row-span-2 grid size-8 place-items-center rounded-pill bg-surface-icon text-primary-600">
+                      <Smartphone size={17} />
+                    </span>
+                    <span className={deliveryIndicatorClassName} />
                   </span>
-                  <strong>E-wallet</strong>
-                  <small>Send to a supported digital wallet</small>
+                  <strong className="self-end text-[13px] font-extrabold md:self-auto md:text-[14px]">
+                    E-wallet
+                  </strong>
+                  <small className="self-start text-[11px] text-gray-400 md:self-auto md:text-[12px]">
+                    Send to a supported digital wallet
+                  </small>
                 </button>
               </div>
             </section>
 
-            <section className="option-section">
-              <label className="field-label" htmlFor="provider">Receiving provider</label>
+            <section className="mt-[19px] w-full md:mt-[25px]">
+              <label className={fieldLabelClassName} htmlFor="provider">
+                Receiving provider
+              </label>
               <select
                 id="provider"
-                className="provider-select"
+                className="min-h-[45px] w-full rounded-[10px] border border-gray-100 bg-white px-[13px] py-0 text-[13px] text-gray-900 contrast-more:border-gray-700 md:min-h-12 md:text-[14px]"
                 value={providerId}
                 onChange={(event) => setProviderId(event.target.value)}
               >
-                {providers.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+                {providers.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
               </select>
             </section>
           </div>
@@ -256,26 +458,51 @@ function CalculatorPage() {
             supported={supported}
           />
 
-          {errors.sendAmount?.message && <p className="status-message" role="alert">{errors.sendAmount.message}</p>}
-          <button type="button" className="continue-button" disabled={!canContinue} onClick={handleContinue}>
+          {errors.sendAmount?.message && (
+            <p className="mt-2 text-[12px] text-red-500" role="alert">
+              {errors.sendAmount.message}
+            </p>
+          )}
+          <button
+            type="button"
+            className="order-3 mt-0 flex min-h-[54px] w-full items-center justify-center gap-[10px] rounded-[11px] border-0 bg-primary-600 text-[14px] font-extrabold text-white enabled:hover:bg-primary-hover disabled:opacity-50 md:order-none md:mt-6 md:min-h-[53px] md:w-[268px]"
+            disabled={!canContinue}
+            onClick={handleContinue}
+          >
             Continue <ArrowRight size={18} />
           </button>
-          <p className="fee-note"><ShieldCheck size={14} /> No hidden fees. Fees are calculated before you continue.</p>
+          <p className="order-4 mt-[-9px] flex items-center justify-center gap-[7px] text-[11px] text-gray-400 md:order-none md:mt-[13px] md:justify-start md:text-[12px]">
+            <ShieldCheck size={14} /> No hidden fees. Fees are calculated before
+            you continue.
+          </p>
         </div>
       </main>
 
-      {historyOpen && (
-        <div role="presentation" onClick={() => setHistoryOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'rgb(0 0 0 / 45%)', display: 'grid', placeItems: 'center', padding: 20 }}>
-          <section role="dialog" aria-modal="true" aria-labelledby="history-title" style={{ width: 'min(100%, 420px)', borderRadius: 16, background: 'white', padding: 22 }} onClick={(event) => event.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 id="history-title">Recent transfers</h2>
-              <button type="button" onClick={() => setHistoryOpen(false)} aria-label="Close history">✕</button>
+      <Dialog.Root open={historyOpen} onOpenChange={setHistoryOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 z-[80] bg-black/45" />
+          <Dialog.Content
+            className="fixed top-1/2 left-1/2 z-[81] w-[min(100%-40px,420px)] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-[22px]"
+            onCloseAutoFocus={(event) => {
+              event.preventDefault()
+              historyTriggerRef.current?.focus()
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <Dialog.Title>Recent transfers</Dialog.Title>
+              <Dialog.Close asChild>
+                <button type="button" aria-label="Close history">
+                  ✕
+                </button>
+              </Dialog.Close>
             </div>
-            <p className="muted">Local demonstration data only.</p>
+            <Dialog.Description className="font-medium text-gray-400">
+              Local demonstration data only.
+            </Dialog.Description>
             <p>History is a mock feature in this take-home milestone.</p>
-          </section>
-        </div>
-      )}
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </>
   )
 }

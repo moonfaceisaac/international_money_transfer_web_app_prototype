@@ -20,30 +20,50 @@ export function TransferSummary({
   supported,
 }: Props) {
   return (
-    <aside className="summary-card" aria-label="Transfer summary">
-      <p className="summary-eyebrow">TRANSFER SUMMARY</p>
-      <span className="summary-label">You send</span>
-      <p className="summary-send">IDR {formatAmount(sendAmount)}</p>
-      <div className="summary-divider" />
-      <div className="summary-line">
+    <aside
+      className="static top-[24px] w-full rounded-[16px] bg-navy-800 px-[18px] py-[19px] text-gray-50 md:sticky md:w-auto md:rounded-[17px] md:px-[26px] md:py-[25px]"
+      aria-label="Transfer summary"
+    >
+      <p className="m-0 mb-[13px] text-[10px] font-extrabold tracking-[0.3px] text-blue-300 md:mb-[16px] md:text-[11px]">
+        TRANSFER SUMMARY
+      </p>
+      <span className="mb-[3px] block text-[12px] text-blue-300">You send</span>
+      <p className="m-0 mb-[16px] text-[31px] leading-[1.15] font-black">
+        IDR {formatAmount(sendAmount)}
+      </p>
+      <div className="my-[13px] h-[1px] bg-blue-200/24 md:my-[16px]" />
+      <div className="mt-[10px] flex justify-between gap-[14px] text-[12px] text-blue-300 md:mt-[12px]">
         <span>Transfer fee</span>
-        <strong>IDR {formatAmount(fee)}</strong>
+        <strong className="text-right text-[12px] font-extrabold text-gray-50">
+          IDR {formatAmount(fee)}
+        </strong>
       </div>
-      <div className="summary-line">
+      <div className="mt-[10px] flex justify-between gap-[14px] text-[12px] text-blue-300 md:mt-[12px]">
         <span>Total to pay</span>
-        <strong>IDR {formatAmount(total)}</strong>
+        <strong className="text-right text-[12px] font-extrabold text-gray-50">
+          IDR {formatAmount(total)}
+        </strong>
       </div>
-      <div className="summary-line">
+      <div className="mt-[10px] flex justify-between gap-[14px] text-[12px] text-blue-300 md:mt-[12px]">
         <span>Rate applied</span>
-        <strong>{rate ? `1 IDR = ${rate.toPrecision(6)} ${currency}` : 'Unavailable'}</strong>
+        <strong className="text-right text-[12px] font-extrabold text-gray-50">
+          {rate ? `1 IDR = ${rate.toPrecision(6)} ${currency}` : 'Unavailable'}
+        </strong>
       </div>
-      <div className="summary-divider" />
-      <span className="summary-label">Recipient gets</span>
-      <p className="summary-receive">
-        {supported ? `${currency} ${formatAmount(receiveAmount)}` : 'Not supported'}
+      <div className="my-[13px] h-[1px] bg-blue-200/24 md:my-[16px]" />
+      <span className="mb-[3px] block text-[12px] text-blue-300">
+        Recipient gets
+      </span>
+      <p className="m-0 mt-[3px] text-[23px] leading-[1.15] font-black text-primary-500 md:text-[26px]">
+        {supported
+          ? `${currency} ${formatAmount(receiveAmount)}`
+          : 'Not supported'}
       </p>
       {!supported && (
-        <p className="summary-note">This destination currency is not currently supported by the rate provider.</p>
+        <p className="mt-[17px] hidden rounded-pill bg-gray-50/10 px-[12px] py-[10px] text-[11px] text-gray-50 md:block">
+          This destination currency is not currently supported by the rate
+          provider.
+        </p>
       )}
     </aside>
   )

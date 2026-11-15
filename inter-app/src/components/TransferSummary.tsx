@@ -1,4 +1,4 @@
-import { formatAmount } from '../../lib/utils/money'
+import { formatAmount } from '../lib/utils/money'
 
 type Props = {
   sendAmount: number
@@ -37,7 +37,7 @@ export function TransferSummary({
         <strong className="text-right text-[12px] font-extrabold text-gray-50">
           IDR {formatAmount(fee)}
         </strong>
-      </div>
+    </div>
       <div className="mt-[10px] flex justify-between gap-[14px] text-[12px] text-blue-300 md:mt-[12px]">
         <span>Total to pay</span>
         <strong className="text-right text-[12px] font-extrabold text-gray-50">

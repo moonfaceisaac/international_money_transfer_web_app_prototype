@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect,useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
@@ -12,9 +12,8 @@ import {
 } from 'lucide-react'
 import { CountryCombobox } from '../components/calculator/CountryCombobox'
 import { AmountField } from '../components/calculator/AmountField'
-import { TransferSummary } from '../components/calculator/TransferSummary'
-import { useExchangeRates } from '../hooks/useExchangeRates'
-import { banks, ewallets, calculateFee } from '../mock/providers'
+import { TransferSummary } from '../components/TransferSummary'
+
 import { transferSchema } from '../schemas/transfer.schema'
 import type { TransferFormValues } from '../schemas/transfer.schema'
 import { useTransferStore } from '../stores/transfer.store'
@@ -22,8 +21,9 @@ import {
   convertAmount,
   formatAmount,
   formatInputAmount,
-  parseAmount,
 } from '../lib/utils/money'
+
+import { useTransferSummary } from '../hooks/useTransferSummary'
 
 import { Header } from '../components/layout/Header'
 
@@ -55,23 +55,19 @@ function CalculatorPage() {
   const setDerivedAmount = useTransferStore((state) => state.setDerivedAmount)
 
   const {
-    data: rates,
-    isLoading: ratesLoading,
-    isError: ratesError,
+    rate,
+    currency,
+    supported,
+    providers,
+    provider,
+    sendAmount,
+    receiveAmount,
+    fee,
+    total,
+    ratesLoading,
+    ratesError,
     refetch,
-  } = useExchangeRates()
-  const rate = destination?.currencyCode
-    ? rates?.[destination.currencyCode]
-    : undefined
-  const supported = Boolean(destination?.currencyCode && rate)
-  const providers = service === 'bank' ? banks : ewallets
-  const provider =
-    providers.find((item) => item.id === providerId) ?? providers[0]
-  const sendAmount = parseAmount(sendAmountText)
-  const receiveAmount = parseAmount(receiveAmountText)
-  const fee = calculateFee(provider, speed, sendAmount)
-  const total = sendAmount + fee
-
+  } = useTransferSummary()
 
   const {
     setValue,
@@ -137,7 +133,6 @@ function CalculatorPage() {
     setReceiveAmount(formatted)
   }
 
-  const currency = destination?.currencyCode ?? '---'
   const exchangeLabel = rate
     ? `1 IDR = ${rate.toPrecision(6)} ${currency}`
     : 'Select a supported destination'
@@ -163,7 +158,7 @@ function CalculatorPage() {
 
   return (
     <>
-      <Header/>
+      <Header />
       <main className="mx-auto w-[min(100%-40px,520px)] md:w-[min(100%-40px,1400px)]">
         <div className="mb-5 md:hidden">
           <div className="mb-2 flex justify-between text-[12px] text-gray-400">

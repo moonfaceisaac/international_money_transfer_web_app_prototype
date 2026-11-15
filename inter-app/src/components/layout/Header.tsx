@@ -10,7 +10,7 @@ export function Header(){
     const historyTriggerRef = useRef<HTMLButtonElement | null>(null)
     return(
         <>
-        <header className="hidden h-[73px] border-b border-gray-100 md:block">
+        <header className="h-[73px] border-b border-gray-100 md:block">
         <div className="mx-auto grid h-full w-[min(100%-40px,1254px)] grid-cols-3 items-center">
           <a
             className="inline-flex items-center gap-[9px] text-[21px] font-black text-gray-900 no-underline"

@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -34,24 +34,25 @@ export const Route = createFileRoute('/')({ component: CalculatorPage })
 const fieldLabelClassName =
   'mb-[6px] flex items-center justify-between gap-3 text-[12px] font-extrabold text-gray-900 md:mb-[7px] md:text-[13px]'
 const speedOptionClassName =
-  'min-h-[49px] rounded-pill border border-transparent bg-transparent text-[12px] font-extrabold text-gray-700 aria-pressed:border-gray-100 aria-pressed:bg-white aria-pressed:text-gray-900 aria-pressed:shadow-segment md:min-h-[42px] md:text-[14px]'
+  'min-h-[49px] rounded-pill border border-transparent bg-transparent text-[12px] font-extrabold text-gray-700 aria-pressed:border-[1.5px] aria-pressed:border-primary-500 aria-pressed:bg-surface-selected aria-pressed:px-[11.5px] aria-pressed:py-[8.5px] md:min-h-[42px] md:text-[14px]'
 const deliveryOptionClassName =
   'group grid min-h-[58px] grid-cols-[32px_1fr_20px] items-center gap-[10px] rounded-control border border-gray-100 bg-white px-3 py-[9px] text-left text-gray-900 aria-pressed:border-[1.5px] aria-pressed:border-primary-500 aria-pressed:bg-surface-selected aria-pressed:px-[11.5px] aria-pressed:py-[8.5px] contrast-more:border-gray-700 md:flex md:min-h-[120px] md:flex-col md:items-stretch md:gap-2 md:p-[14px] md:aria-pressed:p-[13.5px]'
 const deliveryIndicatorClassName =
   'col-start-3 row-span-2 row-start-1 size-[19px] rounded-full border-[1.5px] border-blue-200 group-aria-pressed:border-2 group-aria-pressed:border-primary-600 group-aria-pressed:bg-primary-600 group-aria-pressed:shadow-[inset_0_0_0_4px_white]'
 
 function CalculatorPage() {
+  const navigate = useNavigate()
   const destination = useTransferStore((state) => state.destination)
   const speed = useTransferStore((state) => state.speed)
   const service = useTransferStore((state) => state.service)
-  const providerId = useTransferStore((state) => state.providerId)
+
   const sendAmountText = useTransferStore((state) => state.sendAmount)
   const receiveAmountText = useTransferStore((state) => state.receiveAmount)
   const lastEdited = useTransferStore((state) => state.lastEdited)
+
   const setDestination = useTransferStore((state) => state.setDestination)
   const setSpeed = useTransferStore((state) => state.setSpeed)
   const setService = useTransferStore((state) => state.setService)
-  const setProviderId = useTransferStore((state) => state.setProviderId)
   const setSendAmount = useTransferStore((state) => state.setSendAmount)
   const setReceiveAmount = useTransferStore((state) => state.setReceiveAmount)
   const setDerivedAmount = useTransferStore((state) => state.setDerivedAmount)
@@ -60,8 +61,6 @@ function CalculatorPage() {
     rate,
     currency,
     supported,
-    providers,
-    provider,
     sendAmount,
     receiveAmount,
     fee,
@@ -73,6 +72,7 @@ function CalculatorPage() {
 
   const {
     setValue,
+    trigger,
     formState: { errors },
   } = useForm<TransferFormValues>({
     resolver: zodResolver(transferSchema),
@@ -112,7 +112,7 @@ function CalculatorPage() {
 
   const [activeField, setActiveField] = useState<'send' | 'receive'>('send')
   const canContinue = Boolean(
-    destination && supported && sendAmount > 0 && provider,
+    destination && supported && sendAmount > 0 && service,
   )
 
   const handleSendChange = (value: string) => {
@@ -139,11 +139,10 @@ function CalculatorPage() {
     ? `1 IDR = ${rate.toPrecision(6)} ${currency}`
     : 'Select a supported destination'
 
-  const handleContinue = () => {
-    if (!canContinue) return
-    window.alert(
-      'Page 1 calculator is ready. Recipient and review pages are outside this milestone.',
-    )
+  const handleContinue = async () => {
+    const isValid = await trigger()
+    if (!isValid || !canContinue) return
+    navigate({to:'/recipient'})
   }
 
   const heading = (
@@ -316,9 +315,9 @@ function CalculatorPage() {
                   <strong className="self-end text-[13px] font-extrabold md:self-auto md:text-[14px]">
                     Bank transfer
                   </strong>
-                  <small className="self-start text-[11px] text-gray-400 md:self-auto md:text-[12px]">
-                    Deposit directly into a bank account
-                  </small>
+                  {/* <small className="self-start text-[11px] text-gray-400 md:self-auto md:text-[12px]">
+                    Choose a bank account you want to deliver from
+                  </small> */}
                 </button>
                 <button
                   type="button"
@@ -335,29 +334,8 @@ function CalculatorPage() {
                   <strong className="self-end text-[13px] font-extrabold md:self-auto md:text-[14px]">
                     E-wallet
                   </strong>
-                  <small className="self-start text-[11px] text-gray-400 md:self-auto md:text-[12px]">
-                    Send to a supported digital wallet
-                  </small>
                 </button>
               </div>
-            </section>
-
-            <section className="mt-[19px] w-full md:mt-[25px]">
-              <label className={fieldLabelClassName} htmlFor="provider">
-                Receiving provider
-              </label>
-              <select
-                id="provider"
-                className="min-h-[45px] w-full rounded-[10px] border border-gray-100 bg-white px-[13px] py-0 text-[13px] text-gray-900 contrast-more:border-gray-700 md:min-h-12 md:text-[14px]"
-                value={providerId}
-                onChange={(event) => setProviderId(event.target.value)}
-              >
-                {providers.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
             </section>
           </div>
 
@@ -377,7 +355,7 @@ function CalculatorPage() {
             </p>
           )}
           <button
-            type="button"
+            type="submit"
             className="order-3 mt-0 flex min-h-[54px] w-full items-center justify-center gap-[10px] rounded-[11px] border-0 bg-primary-600 text-[14px] font-extrabold text-white enabled:hover:bg-primary-hover disabled:opacity-50 md:order-none md:mt-6 md:min-h-[53px] md:w-[268px]"
             disabled={!canContinue}
             onClick={handleContinue}

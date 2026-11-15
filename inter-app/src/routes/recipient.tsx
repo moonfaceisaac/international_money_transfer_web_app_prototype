@@ -42,8 +42,8 @@ function RecipientPage() {
       <main className="mx-auto w-[min(100%-40px,520px)] md:w-[min(100%-40px,1400px)]">
         <div className="mb-5 md:hidden">
           <div className="mb-2 flex justify-between text-[12px] text-gray-400">
-            <span>Step 1 of 3</span>
-            <strong className="text-primary-600">Amount</strong>
+            <span>Step 2 of 3</span>
+            <strong className="text-primary-600">Recipient</strong>
           </div>
           <div className="h-1 overflow-hidden rounded-[99px] bg-gray-100">
             <div className="h-full w-[33.333%] rounded-[inherit] bg-primary-600" />
@@ -66,6 +66,7 @@ function RecipientPage() {
             rate={rate}
             supported={supported}
           />
+          
         </div>
       </main>
     </>

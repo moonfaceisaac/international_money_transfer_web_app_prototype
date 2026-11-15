@@ -1,6 +1,9 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-
+import {
+  ArrowRight,
+  ShieldCheck,
+} from 'lucide-react'
 
 import {
   recipientSchema,
@@ -12,10 +15,13 @@ import { AccountNumberField } from './AccountNumberField'
 import { TransferPurposeField } from './TransferPurposeField'
 import { EmailField } from './EmailField'
 import { RecipientNoteField } from './RecipientNoteField'
+import { useNavigate } from '@tanstack/react-router'
 
 export function RecipientForm() {
+  const navigate = useNavigate()
   const form = useForm<RecipientFormValues>({
     resolver: zodResolver(recipientSchema),
+    mode: 'onChange',
     defaultValues: {
       bank: '',
       accountNumber: '',
@@ -61,12 +67,17 @@ export function RecipientForm() {
         shouldDirty: true,
     })
   }
+  const canContinue = form.formState.isValid
 
-  const onSubmit = (values: RecipientFormValues) => {
+  const onSubmit = (values: RecipientFormValues) =>{
     console.log(values)
+    navigate({ to: '/review' })
+
   }
+  const handleContinue = form.handleSubmit(onSubmit)
+
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
+    <form onSubmit={handleContinue}>
       <FullNameField
         label="Full Name"
         value={form.watch('fullName')}
@@ -108,7 +119,18 @@ export function RecipientForm() {
         status={undefined}
         error={form.formState.errors.recipientNote?.message}
       />
-      <button type="submit">Continue</button>
+      <button
+            type="submit"
+            className="order-3 mt-0 flex min-h-[54px] w-full items-center justify-center gap-[10px] rounded-[11px] border-0 bg-primary-600 text-[14px] font-extrabold text-white enabled:hover:bg-primary-hover disabled:opacity-50 md:order-none md:mt-6 md:min-h-[53px] md:w-[268px]"
+            disabled={!canContinue}
+            onClick={handleContinue}
+          >
+            Continue <ArrowRight size={18} />
+          </button>
+          <p className="order-4 mt-[-9px] flex items-center justify-center gap-[7px] text-[11px] text-gray-400 md:order-none md:mt-[13px] md:justify-start md:text-[12px]">
+            <ShieldCheck size={14} /> No hidden fees. Fees are calculated before
+            you continue.
+          </p>
     </form>
 
   )

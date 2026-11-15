@@ -1,6 +1,7 @@
 import * as Popover from '@radix-ui/react-popover'
 import { useState } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
+import { banks } from '../../mock/recipientBank'
 
 import { FormField } from '../ui/FormField'
 
@@ -14,8 +15,7 @@ type Props = {
   onChange: (value: string) => void
 }
 
-// Temporary data. Replace with actual bank data later.
-const banks: string[] = []
+
 
 export function BankNameField({
   label,
@@ -29,8 +29,8 @@ export function BankNameField({
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
 
-  const filteredBanks = banks.filter((bank) =>
-    bank.toLowerCase().includes(search.toLowerCase()),
+  const filteredBanks = banks.filter((banks) =>
+    banks.name.toLowerCase().includes(search.toLowerCase()),
   )
 
   const handleSelect = (bank: string) => {
@@ -112,18 +112,18 @@ export function BankNameField({
               className="max-h-60 overflow-y-auto"
             >
               {filteredBanks.length > 0 ? (
-                filteredBanks.map((bank) => (
+                filteredBanks.map((banks) => (
                   <button
-                    key={bank}
+                    key={banks.id}
                     type="button"
                     role="option"
-                    aria-selected={value === bank}
-                    onClick={() => handleSelect(bank)}
+                    aria-selected={value === banks.name}
+                    onClick={() => handleSelect(banks.name)}
                     className="flex w-full items-center justify-between rounded-lg px-3 py-3 text-left text-sm font-medium text-gray-900 hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none"
                   >
-                    {bank}
+                    {banks.name}
 
-                    {value === bank && (
+                    {value === banks.name && (
                       <Check size={16} className="text-primary-500" />
                     )}
                   </button>

@@ -49,3 +49,8 @@ export type TransferProvider = {
   logo?: string
   fees: FeeRules
 }
+
+export type RecipientBank = {
+  id: string
+  name: string
+} 

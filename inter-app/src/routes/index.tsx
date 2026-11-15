@@ -1,16 +1,12 @@
-import * as Dialog from '@radix-ui/react-dialog'
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect,useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import {
-  ArrowLeft,
   ArrowRight,
   ArrowDownUp,
   Building2,
-  History,
   RefreshCw,
-  Send,
   ShieldCheck,
   Smartphone,
 } from 'lucide-react'
@@ -28,6 +24,8 @@ import {
   formatInputAmount,
   parseAmount,
 } from '../lib/utils/money'
+
+import { Header } from '../components/layout/Header'
 
 export const Route = createFileRoute('/')({ component: CalculatorPage })
 
@@ -74,6 +72,7 @@ function CalculatorPage() {
   const fee = calculateFee(provider, speed, sendAmount)
   const total = sendAmount + fee
 
+
   const {
     setValue,
     formState: { errors },
@@ -114,8 +113,6 @@ function CalculatorPage() {
   }, [sendAmountText, receiveAmountText, setValue])
 
   const [activeField, setActiveField] = useState<'send' | 'receive'>('send')
-  const [historyOpen, setHistoryOpen] = useState(false)
-  const historyTriggerRef = useRef<HTMLButtonElement | null>(null)
   const canContinue = Boolean(
     destination && supported && sendAmount > 0 && provider,
   )
@@ -166,65 +163,8 @@ function CalculatorPage() {
 
   return (
     <>
-      <header className="hidden h-[73px] border-b border-gray-100 md:block">
-        <div className="mx-auto grid h-full w-[min(100%-40px,1254px)] grid-cols-3 items-center">
-          <a
-            className="inline-flex items-center gap-[9px] text-[21px] font-black text-gray-900 no-underline"
-            href="/"
-            aria-label="Inter home"
-          >
-            <span className="grid size-[33px] place-items-center rounded-[11px] bg-primary-500 text-white">
-              <Send size={19} />
-            </span>
-            Inter
-          </a>
-          <button
-            type="button"
-            className="inline-flex items-center gap-2 justify-self-center border-0 bg-transparent p-2 text-gray-700 hover:text-primary-600"
-            onClick={(event) => {
-              historyTriggerRef.current = event.currentTarget
-              setHistoryOpen(true)
-            }}
-          >
-            <History size={16} /> History
-          </button>
-          <div
-            className="flex items-center gap-3 justify-self-end"
-            aria-label="Sending currency"
-          >
-            <span className="shrink-0 rounded-pill border border-gray-100 bg-white px-3 py-2 text-[12px] font-extrabold text-gray-700">
-              IDR · Indonesia
-            </span>
-          </div>
-        </div>
-      </header>
-
+      <Header/>
       <main className="mx-auto w-[min(100%-40px,520px)] md:w-[min(100%-40px,1400px)]">
-        <div className="grid h-[76px] grid-cols-[40px_1fr_40px] items-center md:hidden">
-          <button
-            type="button"
-            className="grid size-9 place-items-center rounded-[11px] border border-gray-100 bg-white text-gray-900"
-            aria-label="Back"
-            onClick={() => window.history.back()}
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <h2 className="m-0 text-center text-[16px] font-extrabold">
-            Send money
-          </h2>
-          <button
-            type="button"
-            className="grid size-9 place-items-center rounded-[11px] border border-gray-100 bg-white text-gray-900"
-            aria-label="History"
-            onClick={(event) => {
-              historyTriggerRef.current = event.currentTarget
-              setHistoryOpen(true)
-            }}
-          >
-            <History size={18} />
-          </button>
-        </div>
-
         <div className="mb-5 md:hidden">
           <div className="mb-2 flex justify-between text-[12px] text-gray-400">
             <span>Step 1 of 3</span>
@@ -477,32 +417,6 @@ function CalculatorPage() {
           </p>
         </div>
       </main>
-
-      <Dialog.Root open={historyOpen} onOpenChange={setHistoryOpen}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 z-[80] bg-black/45" />
-          <Dialog.Content
-            className="fixed top-1/2 left-1/2 z-[81] w-[min(100%-40px,420px)] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-[22px]"
-            onCloseAutoFocus={(event) => {
-              event.preventDefault()
-              historyTriggerRef.current?.focus()
-            }}
-          >
-            <div className="flex items-center justify-between">
-              <Dialog.Title>Recent transfers</Dialog.Title>
-              <Dialog.Close asChild>
-                <button type="button" aria-label="Close history">
-                  ✕
-                </button>
-              </Dialog.Close>
-            </div>
-            <Dialog.Description className="font-medium text-gray-400">
-              Local demonstration data only.
-            </Dialog.Description>
-            <p>History is a mock feature in this take-home milestone.</p>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
     </>
   )
 }

@@ -23,6 +23,8 @@ import {
   formatInputAmount,
 } from '../lib/utils/money'
 
+import { TransferStepper } from '#/components/layout/TransferStepper'
+
 import { useTransferSummary } from '../hooks/useTransferSummary'
 
 import { Header } from '../components/layout/Header'
@@ -172,31 +174,7 @@ function CalculatorPage() {
 
         <div className="flex flex-col items-stretch gap-[19px] pt-0 pb-7 md:grid md:grid-cols-[minmax(0,1fr)_382px] md:items-start md:gap-[52px] md:pt-[38px] md:pb-14">
           <div className="contents min-w-0 md:block">
-            <nav
-              className="mb-6 hidden items-center gap-[10px] text-gray-400 md:flex"
-              aria-label="Transfer progress"
-            >
-              <span className="inline-flex items-center gap-2 rounded-[99px] border border-primary-500 py-1 pr-[10px] pl-1 text-[13px] whitespace-nowrap text-primary-600">
-                <span className="grid size-[22px] place-items-center rounded-full bg-primary-500 text-[11px] font-extrabold text-white">
-                  1
-                </span>{' '}
-                Amount
-              </span>
-              <span className="h-px w-[22px] bg-blue-200" />
-              <span className="inline-flex items-center gap-2 text-[13px] whitespace-nowrap">
-                <span className="grid size-[22px] place-items-center rounded-full bg-gray-100 text-[11px] font-extrabold text-gray-500">
-                  2
-                </span>{' '}
-                Recipient
-              </span>
-              <span className="h-px w-[22px] bg-blue-200" />
-              <span className="inline-flex items-center gap-2 text-[13px] whitespace-nowrap">
-                <span className="grid size-[22px] place-items-center rounded-full bg-gray-100 text-[11px] font-extrabold text-gray-500">
-                  3
-                </span>{' '}
-                Review
-              </span>
-            </nav>
+            <TransferStepper/>
 
             {heading}
 

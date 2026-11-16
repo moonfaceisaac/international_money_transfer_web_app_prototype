@@ -1,14 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
-import * as Dialog from '@radix-ui/react-dialog'
-import { useEffect, useRef, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import { RecipientForm } from '#/components/recipient/RecipientForm'
 import { TransferSummary } from '../components/TransferSummary'
 import { useTransferSummary } from '#/hooks/useTransferSummary'
 import { Header } from '../components/layout/Header'
 import { TransferStepper } from '#/components/layout/TransferStepper'
+import { requireTransfer } from '../lib/route-guards'
 export const Route = createFileRoute('/recipient')({
+  beforeLoad:requireTransfer,
   component: RecipientPage,
 })
 

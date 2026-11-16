@@ -7,6 +7,7 @@ import { initialTransactions } from '../data/transactions'
 
 type TransactionState = {
   transactions: Transaction[]
+  activeTransactionId: string | null
   addTransaction: (transaction: Transaction) => void
 }
 
@@ -14,6 +15,7 @@ export const useTransactionStore = create<TransactionState>()(
   persist(
     (set) => ({
       transactions: initialTransactions,
+      activeTransactionId: null,
 
       addTransaction: (transaction) =>
         set((state) => ({
@@ -21,6 +23,7 @@ export const useTransactionStore = create<TransactionState>()(
             transaction,
             ...state.transactions,
           ],
+          activeTransactionId: transaction.id,
         })),
     }),
     {
@@ -29,4 +32,8 @@ export const useTransactionStore = create<TransactionState>()(
       skipHydration: true,
     },
   ),
+  
 )
+console.log('Transaction store:', useTransactionStore)
+console.log('Persist API:', useTransactionStore.persist)
+console.log('Persist methods:', Object.keys(useTransactionStore.persist ?? {}))

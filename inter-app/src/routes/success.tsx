@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Header } from '../components/layout/Header'
-import { TransferStepper } from '../components/layout/TransferStepper'
 import { useTransferStore } from '../stores/transfer.store'
 import { Check, CheckCircle2, Landmark, Star } from 'lucide-react'
 import { useTransferSummary } from '../hooks/useTransferSummary'
@@ -16,18 +15,13 @@ function RouteComponent() {
   const [rating, setRating] = useState(0)
   const [hoverRating, setHoverRating] = useState(0)
   const [isSubmitted, setIsSubmitted] = useState(false)
-
   const ratingLabels = ['Poor', 'Fair', 'Good', 'Very good', 'Excellent']
-
   const displayedRating = hoverRating || rating
   const ratingLabel = rating > 0 ? ratingLabels[rating - 1] : 'Select a rating'
 
   const {
-    destination,
     rate,
     currency,
-    supported,
-    providers,
     sendAmount,
     receiveAmount,
     fee,
@@ -270,6 +264,3 @@ function RouteComponent() {
   )
 }
 
-// data needed: transaction details & rating stars
-//recipient name, recipient bank, you send, fee, total paid, rate, recipient recieves
-//paid with

@@ -9,6 +9,7 @@ import { Header } from '../components/layout/Header'
 import { TransferStepper } from '#/components/layout/TransferStepper'
 import { useNavigate } from '@tanstack/react-router'
 import * as Checkbox from '@radix-ui/react-checkbox'
+import { requireRecipient } from '../lib/route-guards'
 import {
   Check,
   ShieldCheck,
@@ -17,6 +18,7 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 export const Route = createFileRoute('/review')({
+  beforeLoad: requireRecipient,
   component: ReviewPage,
 })
 

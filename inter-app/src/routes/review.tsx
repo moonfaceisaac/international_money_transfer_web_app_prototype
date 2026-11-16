@@ -101,15 +101,6 @@ function ReviewPage() {
       <main className="mx-auto w-[min(100%-40px,520px)] md:w-[min(100%-40px,1400px)]">
         <div className="mx-auto w-full max-w-[720px]">
           <TransferStepper />
-          <div className="mb-4 mt-2 md:hidden">
-            <div className="mb-2 flex items-center justify-between text-xs font-semibold">
-              <span className="text-gray-500">Step 3 of 3</span>
-              <span className="text-[#1970f0]">Review</span>
-            </div>
-            <div className="h-1 w-full overflow-hidden rounded-full bg-gray-200">
-              <div className="h-full w-full bg-[#1970f0]"></div>
-            </div>
-          </div>
 
           {heading}
           

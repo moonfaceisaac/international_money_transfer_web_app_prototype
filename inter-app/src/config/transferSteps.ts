@@ -1,5 +1,5 @@
 export const transferSteps = [
-  { id: 'amount', label: 'Amount', to: '/' },
+  { id: 'calculator', label: 'Calculator', to: '/' },
   { id: 'recipient', label: 'Recipient', to: '/recipient' },
   { id: 'review', label: 'Review', to: '/review' },
 ] as const

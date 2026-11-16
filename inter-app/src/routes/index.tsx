@@ -163,15 +163,7 @@ function CalculatorPage() {
     <>
       <Header />
       <main className="mx-auto w-[min(100%-40px,520px)] md:w-[min(100%-40px,1400px)]">
-        <div className="mb-5 md:hidden">
-          <div className="mb-2 flex justify-between text-[12px] text-gray-400">
-            <span>Step 1 of 3</span>
-            <strong className="text-primary-600">Amount</strong>
-          </div>
-          <div className="h-1 overflow-hidden rounded-[99px] bg-gray-100">
-            <div className="h-full w-[33.333%] rounded-[inherit] bg-primary-600" />
-          </div>
-        </div>
+      
 
         <div className="flex flex-col items-stretch gap-[19px] pt-0 pb-7 md:grid md:grid-cols-[minmax(0,1fr)_382px] md:items-start md:gap-[52px] md:pt-[38px] md:pb-14">
           <div className="contents min-w-0 md:block">

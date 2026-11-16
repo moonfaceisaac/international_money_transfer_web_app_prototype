@@ -33,13 +33,13 @@ export function TransferSummary({
       </p>
       <div className="my-[13px] h-[1px] bg-blue-200/24 md:my-[16px]" />
       <div className="mt-[10px] flex justify-between gap-[14px] text-[12px] text-blue-300 md:mt-[12px]">
-        <span>Transfer fee</span>
+        <span>Transfer fee (Bank Admin + Speed Admin)</span>
         <strong className="text-right text-[12px] font-extrabold text-gray-50">
           IDR {formatAmount(fee)}
         </strong>
     </div>
       <div className="mt-[10px] flex justify-between gap-[14px] text-[12px] text-blue-300 md:mt-[12px]">
-        <span>Total to pay</span>
+        <span>Total to pay (What you send + Transfer Fee)</span>
         <strong className="text-right text-[12px] font-extrabold text-gray-50">
           IDR {formatAmount(total)}
         </strong>

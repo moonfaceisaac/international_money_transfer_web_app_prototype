@@ -1,62 +1,80 @@
-import { FormField } from "../ui/FormField"
+
+import { FormField } from '../ui/FormField'
 
 type Props = {
-    label: string
-    value: string
-    status?: string
-    error?: string
-    disabled?: boolean
-    active?: boolean
-    onChange: (value: string) => void
-    
+  label: string
+  value: string
+  status?: string
+  error?: string
+  disabled?: boolean
+  active?: boolean
+  onChange: (value: string) => void
 }
 
 export function RecipientNoteField({
-    
-    label,
-    value,
-    status,
-    error,
-    disabled = false,
-    active = false,
-    onChange,
+  label,
+  value,
+  status,
+  error,
+  disabled = false,
+  active = false,
+  onChange,
 }: Props) {
-    const characterCounter =  value.length
+  const characterCounter = value.length
 
-    return (
-        <FormField
-            label={label}
-            htmlFor="recipient-note"
-            className="w-full"
-        >
-        <div
-        className={`flex h-[63px] items-center gap-3 rounded-control-mobile pr-[13px] focus-within:border-primary-500 md:h-[70px] md:rounded-control md:pr-[14px] ${
+  return (
+    <FormField
+      label={label}
+      htmlFor="recipient-note"
+      className="w-full"
+    >
+      <div
+        className={`relative rounded-control-mobile md:rounded-control ${
           active
-            ? 'border-2 border-primary-500 pl-3 md:pl-[18px]'
-            : 'border-[1.5px] border-gray-100 pl-[13px] contrast-more:border-gray-700 md:pl-[19px]'
-        }`}
-        >
-            <div>
-                <p>{characterCounter}/255</p>
-            </div>
-            <input
-                id="recipient-note"
-                className="w-full min-w-0 border-0 bg-transparent text-[24px] font-extrabold tracking-[-0.5px] text-gray-900 outline-none focus-visible:outline-none md:text-[28px]"
-                inputMode="text"
-                type="text"
-                value={value}
-                disabled={disabled}
-                placeholder="Note to recipient"
-                onChange={(event) => onChange(event.target.value)}
-            >
-            </input>
-        </div>
-        {error &&(
-        <span className='text-sm font-medium text-red-500'>
-            {error}
-        </span>)}
+            ? 'border-2 border-primary-500'
+            : 'border-[1.5px] border-gray-100 contrast-more:border-gray-700'
+        } ${disabled ? 'opacity-50' : ''}`}
+      >
+        <textarea
+          id="recipient-note"
+          className="min-h-[120px] w-full resize-none border-0 bg-transparent px-[13px] pt-[13px] pb-[34px] text-[15px] leading-relaxed font-semibold tracking-[-0.2px] text-gray-900 outline-none placeholder:font-medium placeholder:text-gray-400 focus-visible:outline-none md:min-h-[140px] md:px-[19px] md:pt-[17px] md:text-[16px]"
+          value={value}
+          disabled={disabled}
+          maxLength={255}
+          rows={3}
+          placeholder="Write a note to your recipient..."
+          aria-invalid={Boolean(error)}
+          aria-describedby={
+            error
+              ? 'recipient-note-error recipient-note-counter'
+              : 'recipient-note-counter'
+          }
+          onChange={(event) => onChange(event.target.value)}
+        />
 
-        {status && <span className="font-medium text-green-500">{status}</span>}
-        </FormField>
-    )
+        <span
+          id="recipient-note-counter"
+          className="pointer-events-none absolute right-[13px] bottom-[10px] text-[11px] font-semibold tabular-nums text-gray-400 md:right-[19px] md:bottom-[12px]"
+          aria-live="polite"
+        >
+          {characterCounter}/255
+        </span>
+      </div>
+
+      {error && (
+        <span
+          id="recipient-note-error"
+          className="text-sm font-medium text-red-500"
+        >
+          {error}
+        </span>
+      )}
+
+      {status && (
+        <span className="font-medium text-green-500">
+          {status}
+        </span>
+      )}
+    </FormField>
+  )
 }

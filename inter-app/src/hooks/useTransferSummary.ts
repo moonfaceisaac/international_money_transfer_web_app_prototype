@@ -1,5 +1,5 @@
 import { useExchangeRates } from './useExchangeRates'
-import { banks, ewallets, calculateFee } from '../mock/providers'
+import { banks, ewallets, calculateFee} from '../mock/providers'
 import { useTransferStore } from '../stores/transfer.store'
 import { parseAmount } from '../lib/utils/money'
 
@@ -36,7 +36,8 @@ export function useTransferSummary() {
   const receiveAmount = parseAmount(receiveAmountText)
 
 
-  const fee = calculateFee(provider, speed, sendAmount)
+  const fee = calculateFee(provider, speed)
+ 
   const total = sendAmount + fee
 
   return {

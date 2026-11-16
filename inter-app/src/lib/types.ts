@@ -54,7 +54,7 @@ export type FeeRules = {
 }
 
 export type TransferProvider = {
-  id: string
+  id: string 
   name: string
   logo?: string
   fees: FeeRules

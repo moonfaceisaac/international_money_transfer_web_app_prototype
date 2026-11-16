@@ -12,7 +12,7 @@ type TransferState = {
   destination: DestinationCountry | null
   speed: TransferSpeed
   service: TransferService
-  providerId: string
+  providerId: string 
   sendAmount: string
   receiveAmount: string
   lastEdited: LastEdited
@@ -31,7 +31,7 @@ export const useTransferStore = create<TransferState>((set) => ({
   destination: null,
   speed: 'instant',
   service: 'bank',
-  providerId: 'bca',
+  providerId: "",
   sendAmount: '0',
   receiveAmount: '',
   lastEdited: 'send',

@@ -11,8 +11,6 @@ import { useNavigate } from '@tanstack/react-router'
 import * as Checkbox from '@radix-ui/react-checkbox'
 import {
   Check,
-  Clock,
-  Edit2,
   ShieldCheck,
   X,
   ArrowRight,
@@ -109,9 +107,6 @@ function ReviewPage() {
           <section className="mb-6">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-semibold text-gray-900">Transfer details</h2>
-              <button className="flex items-center gap-1 text-sm font-semibold text-[#1970f0] hover:underline">
-                <Edit2 size={14} /> Edit amount
-              </button>
             </div>
             <div className="overflow-hidden rounded-[13px] border border-gray-100 bg-white shadow-sm">
               <div className="flex flex-col gap-3 p-4 text-sm">
@@ -149,7 +144,6 @@ function ReviewPage() {
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-semibold text-gray-900">Recipient</h2>
               <button className="flex items-center gap-1 text-sm font-semibold text-[#1970f0] hover:underline">
-                <Edit2 size={14} /> Edit
               </button>
             </div>
             <div className="rounded-[13px] border border-gray-100 bg-white shadow-sm">
@@ -200,6 +194,12 @@ function ReviewPage() {
                     {recipient?.recipientNote}
                   </span>
                 </div>
+                 <div className="flex items-center justify-between border-t border-gray-100 bg-[#f5f8fc] p-4">
+                <span className="font-bold">Total will be sent to recipient</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-extrabold">{currency} {receiveAmount}</span>
+                </div>
+              </div>
               </div>
             </div>
           </section>
@@ -281,7 +281,7 @@ function ReviewPage() {
               <div className="h-px w-full bg-gray-200"></div>
               <div className="flex justify-between text-sm">
                 <span className="font-semibold text-gray-900">
-                  Total debited
+                  Total to pay
                 </span>
                 <span className="font-bold text-[#1970f0]">{total}</span>
               </div>

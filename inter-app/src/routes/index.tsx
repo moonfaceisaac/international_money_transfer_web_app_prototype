@@ -144,7 +144,7 @@ function CalculatorPage() {
   const handleContinue = async () => {
     const isValid = await trigger()
     if (!isValid || !canContinue) return
-    navigate({to:'/recipient'})
+    navigate({ to: '/recipient' })
   }
 
   const heading = (
@@ -163,11 +163,9 @@ function CalculatorPage() {
     <>
       <Header />
       <main className="mx-auto w-[min(100%-40px,520px)] md:w-[min(100%-40px,1400px)]">
-      
-
         <div className="flex flex-col items-stretch gap-[19px] pt-0 pb-7 md:grid md:grid-cols-[minmax(0,1fr)_382px] md:items-start md:gap-[52px] md:pt-[38px] md:pb-14">
           <div className="contents min-w-0 md:block">
-          <TransferStepper/>
+            <TransferStepper />
 
             {heading}
 
@@ -256,6 +254,12 @@ function CalculatorPage() {
             </div>
 
             <section className="mt-[19px] w-full md:mt-[25px]">
+              <div>
+                <p className="m-0 mb-6 hidden text-[15px] leading-[1.55] text-gray-700 md:block">
+                  NOTICE: Speed and Delivery Method adds up to the transfer fee
+                  as it has its own admin fee
+                </p>
+              </div>
               <label className={fieldLabelClassName}>Transfer speed</label>
               <div
                 className="grid grid-cols-2 gap-[5px] rounded-xl bg-surface p-1"
@@ -309,9 +313,13 @@ function CalculatorPage() {
                   <strong className="self-end text-[13px] font-extrabold md:self-auto md:text-[14px]">
                     Bank transfer
                   </strong>
-                  {/* <small className="self-start text-[11px] text-gray-400 md:self-auto md:text-[12px]">
-                    Choose a bank account you want to deliver from
-                  </small> */}
+                  <div>
+                    <em>
+                      Bank transfer automatically chooses BCA as the provider,
+                      you get to pick the provider you wanted later at the
+                      review page.
+                    </em>
+                  </div>
                 </button>
                 <button
                   type="button"
@@ -328,6 +336,11 @@ function CalculatorPage() {
                   <strong className="self-end text-[13px] font-extrabold md:self-auto md:text-[14px]">
                     E-wallet
                   </strong>
+                  <em>
+                    E-wallet automatically chooses GoPay as the provider, you
+                    get to pick the provider you wanted later at the review
+                    page.
+                  </em>
                 </button>
               </div>
             </section>
@@ -341,6 +354,7 @@ function CalculatorPage() {
             currency={currency}
             rate={rate}
             supported={supported}
+           
           />
 
           {errors.sendAmount?.message && (

@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 import { Header } from '../components/layout/Header'
 import { TransferStepper } from '../components/layout/TransferStepper'
 import { useTransferStore } from '../stores/transfer.store'
@@ -12,7 +13,14 @@ export const Route = createFileRoute('/success')({
 function RouteComponent() {
   const recipient = useTransferStore((state) => state.recipient)
   const providerId = useTransferStore((state) => state.providerId)
+  const [rating, setRating] = useState(0)
+  const [hoverRating, setHoverRating] = useState(0)
+  const [isSubmitted, setIsSubmitted] = useState(false)
 
+  const ratingLabels = ['Poor', 'Fair', 'Good', 'Very good', 'Excellent']
+
+  const displayedRating = hoverRating || rating
+  const ratingLabel = rating > 0 ? ratingLabels[rating - 1] : 'Select a rating'
 
   const {
     destination,
@@ -25,18 +33,7 @@ function RouteComponent() {
     fee,
     total,
   } = useTransferSummary()
- 
 
-  // const heading = (
-  //   <div className="w-full">
-  //     <h1 className="m-0 mb-[15px] text-[25px] leading-[1.22] font-extrabold tracking-[-0.5px] md:mb-1 md:text-[clamp(25px,3vw,31px)] md:leading-[1.2] md:tracking-[-0.7px]">
-  //       Money's on the way
-  //     </h1>
-  //     <p className="m-0 mb-6 hidden text-[15px] leading-[1.55] text-gray-700 md:block">
-  //       something something
-  //     </p>
-  //   </div>
-  // )
   return (
     <>
       <Header />
@@ -57,9 +54,8 @@ function RouteComponent() {
           </h1>
 
           <p className="mb-[21px] max-w-[570px] text-[14px] leading-[1.55] text-gray-700 md:text-[15px]">
-            is heading to{' '}
-            {recipient?.recipientFullName}'s { recipient?.recipientBankName ?? 'recipient'}{' '}
-            account.
+            is heading to {recipient?.recipientFullName}'s{' '}
+            {recipient?.recipientBankName ?? 'recipient'} account.
           </p>
         </section>
 
@@ -147,9 +143,7 @@ function RouteComponent() {
               <p className="mb-[3px] text-[9px] font-extrabold text-gray-400">
                 FEE
               </p>
-              <p className="text-[12px] font-extrabold text-gray-950">
-                {fee}
-              </p>
+              <p className="text-[12px] font-extrabold text-gray-950">{fee}</p>
             </div>
 
             <div>
@@ -177,7 +171,7 @@ function RouteComponent() {
                 RECIPIENT RECEIVES
               </p>
               <p className="text-[12px] font-extrabold text-primary-600">
-                {receiveAmount}
+                {currency} {receiveAmount}
               </p>
             </div>
           </div>
@@ -190,39 +184,86 @@ function RouteComponent() {
         </section>
 
         {/* Transfer feedback */}
-        <section className="mt-[20px] flex w-full flex-col gap-[12px] rounded-[14px] bg-surface px-[18px] py-[15px] sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <section className="mt-[20px] flex w-full flex-col gap-[15px] rounded-[14px] bg-surface px-[18px] py-[17px] sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div>
             <h2 className="text-[13px] font-extrabold text-gray-950">
               How was this transfer?
             </h2>
-            <p className="text-[10px] text-gray-700">
+            <p className="mt-1 text-[11px] text-gray-700">
               Your rating helps us make sending money simpler.
             </p>
           </div>
 
-          <div className="flex items-center gap-[5px]">
+          {isSubmitted ? (
             <div
-              className="flex items-center gap-[3px]"
-              aria-label="4 out of 5 stars"
+              className="flex items-center gap-2 text-green-500"
+              role="status"
             >
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Star
-                  key={star}
-                  size={23}
-                  strokeWidth={2}
-                  className={
-                    star <= 4
-                      ? 'fill-transparent text-yellow-500'
-                      : 'fill-transparent text-blue-200'
-                  }
-                />
-              ))}
+              <CheckCircle2 size={18} />
+              <span className="text-[12px] font-bold">
+                Thanks for your feedback!
+              </span>
             </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-[5px]">
+                <div
+                  className="flex items-center gap-[3px]"
+                  onMouseLeave={() => setHoverRating(0)}
+                  role="group"
+                  aria-label="Rate your transfer from 1 to 5 stars"
+                >
+                  {[1, 2, 3, 4, 5].map((star) => {
+                    const isFilled = star <= displayedRating
 
-            <span className="ml-[10px] whitespace-nowrap text-[10px] font-bold text-gray-950">
-              4 of 5
-            </span>
-          </div>
+                    return (
+                      <button
+                        key={star}
+                        type="button"
+                        aria-label={`${star} out of 5 stars`}
+                        aria-pressed={rating === star}
+                        onClick={() => setRating(star)}
+                        onMouseEnter={() => setHoverRating(star)}
+                        className="grid size-[32px] place-items-center rounded-full transition-transform duration-150 hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500"
+                      >
+                        <Star
+                          size={23}
+                          strokeWidth={2}
+                          className={`transition-colors duration-150 ${
+                            isFilled
+                              ? 'fill-yellow-400 text-yellow-500'
+                              : 'fill-transparent text-blue-200'
+                          }`}
+                        />
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <span
+                  className="ml-[7px] min-w-[75px] text-[11px] font-bold text-gray-700"
+                  aria-live="polite"
+                >
+                  {rating > 0 ? `${rating}/5` : ''}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-[11px] font-semibold text-gray-500">
+                  {ratingLabel}
+                </span>
+
+                <button
+                  type="button"
+                  disabled={rating === 0}
+                  onClick={() => setIsSubmitted(true)}
+                  className="rounded-pill bg-primary-600 px-4 py-[8px] text-[11px] font-extrabold text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
+                >
+                  Submit rating
+                </button>
+              </div>
+            </div>
+          )}
         </section>
       </main>
     </>

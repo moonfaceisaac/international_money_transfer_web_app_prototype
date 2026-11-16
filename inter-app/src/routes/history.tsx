@@ -389,7 +389,7 @@ function RouteComponent() {
               Your transfers
             </h1>
             <p className="mt-1 text-[13px] text-gray-700">
-              Every transfer you've made with Topremit, newest first.
+              Every transfer you've made with Inter, newest first.
             </p>
           </div>
 
@@ -402,26 +402,7 @@ function RouteComponent() {
           </Link>
         </div>
 
-        {/* Summary statistics */}
-        <section className="mb-6 grid grid-cols-2 overflow-hidden rounded-[13px] border border-gray-100 bg-white md:grid-cols-4">
-          <Stat
-            label="SENT THIS MONTH"
-            value={formatMoney(stats.sent, 'IDR')}
-          />
-          <Stat
-            label="TRANSFERS"
-            value={String(stats.total)}
-          />
-          <Stat
-            label="IN PROGRESS"
-            value={String(stats.inProgress)}
-            highlight
-          />
-          <Stat
-            label="TOTAL RECEIVED THIS MONTH"
-            value={formatMoney(stats.received, 'PHP')}
-          />
-        </section>
+      
 
         {/* Filters */}
         <div className="mb-5 flex flex-wrap items-center gap-2">

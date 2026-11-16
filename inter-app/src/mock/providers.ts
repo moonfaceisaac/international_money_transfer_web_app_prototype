@@ -17,7 +17,6 @@ export const ewallets: TransferProvider[] = [
 export function calculateFee(
   provider: TransferProvider | undefined,
   speed: 'instant' | 'regular',
-  _amount: number,
 ) {
   if (!provider) return 0
   return provider.fees[speed]

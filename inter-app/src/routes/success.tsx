@@ -10,14 +10,21 @@ export const Route = createFileRoute('/success')({
 })
 
 function RouteComponent() {
-  const { destination, rate, currency, sendAmount, receiveAmount, fee, total } =
-    useTransferSummary()
-  const recipientName = 'Maria Santos'
-  const recipientBank = 'BPI — Bank of the Philippine Islands'
-  const reference = 'KT-9F2X-4471'
-  const paymentMethod = 'Paid with Emirates NBD •••• 4126'
+  const recipient = useTransferStore((state) => state.recipient)
+  const providerId = useTransferStore((state) => state.providerId)
 
-  const sendCurrency = 'IDR'
+
+  const {
+    destination,
+    rate,
+    currency,
+    supported,
+    providers,
+    sendAmount,
+    receiveAmount,
+    fee,
+    total,
+  } = useTransferSummary()
  
 
   // const heading = (
@@ -51,8 +58,8 @@ function RouteComponent() {
 
           <p className="mb-[21px] max-w-[570px] text-[14px] leading-[1.55] text-gray-700 md:text-[15px]">
             is heading to{' '}
-            {recipientName}'s {destination?.currencyCode ?? 'recipient'}{' '}
-            account. It should land by today, about 3:20 PM local time.
+            {recipient?.recipientFullName}'s { recipient?.recipientBankName ?? 'recipient'}{' '}
+            account.
           </p>
         </section>
 
@@ -62,15 +69,15 @@ function RouteComponent() {
           <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-[17px] py-[13px]">
             <div className="flex min-w-0 items-center gap-[10px]">
               <div className="grid size-[34px] shrink-0 place-items-center rounded-full bg-primary-soft text-[11px] font-bold text-primary-600">
-                MS
+                {recipient?.recipientFullName[0].toUpperCase()}
               </div>
 
               <div className="min-w-0">
                 <p className="truncate text-[13px] font-extrabold text-gray-950">
-                  {recipientName}
+                  {recipient?.recipientFullName}
                 </p>
                 <p className="truncate text-[11px] text-gray-400">
-                  {recipientBank}
+                  {recipient?.recipientBankName}
                 </p>
               </div>
             </div>
@@ -118,21 +125,21 @@ function RouteComponent() {
 
           {/* Transaction summary */}
           <div className="grid grid-cols-2 gap-x-4 gap-y-[13px] px-[17px] py-[16px] sm:grid-cols-3">
-            <div>
+            {/* <div>
               <p className="mb-[3px] text-[9px] font-extrabold text-gray-400">
                 REFERENCE
               </p>
               <p className="text-[12px] font-extrabold text-gray-950">
                 {reference}
               </p>
-            </div>
+            </div> */}
 
             <div>
               <p className="mb-[3px] text-[9px] font-extrabold text-gray-400">
                 YOU SENT
               </p>
               <p className="text-[12px] font-extrabold text-gray-950">
-                asd
+                {sendAmount}
               </p>
             </div>
 
@@ -141,7 +148,7 @@ function RouteComponent() {
                 FEE
               </p>
               <p className="text-[12px] font-extrabold text-gray-950">
-                sad
+                {fee}
               </p>
             </div>
 
@@ -150,7 +157,7 @@ function RouteComponent() {
                 TOTAL PAID
               </p>
               <p className="text-[12px] font-extrabold text-gray-950">
-                asd
+                {total}
               </p>
             </div>
 
@@ -160,7 +167,7 @@ function RouteComponent() {
               </p>
               <p className="text-[12px] font-extrabold text-gray-950">
                 {rate
-                  ? `1 ${sendCurrency} = ${rate.toPrecision(6)} ${currency}`
+                  ? `1 ${currency} = ${rate.toPrecision(6)} ${currency}`
                   : '---'}
               </p>
             </div>
@@ -170,7 +177,7 @@ function RouteComponent() {
                 RECIPIENT RECEIVES
               </p>
               <p className="text-[12px] font-extrabold text-primary-600">
-                asd
+                {receiveAmount}
               </p>
             </div>
           </div>
@@ -178,7 +185,7 @@ function RouteComponent() {
           {/* Payment method */}
           <div className="flex items-center gap-[7px] border-t border-gray-100 bg-surface px-[17px] py-[11px]">
             <Landmark size={13} className="shrink-0 text-gray-400" />
-            <span className="text-[10px] text-gray-700">{paymentMethod}</span>
+            <span className="text-[10px] text-gray-700">{providerId}</span>
           </div>
         </section>
 

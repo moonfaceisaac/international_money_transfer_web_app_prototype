@@ -50,6 +50,8 @@ function CalculatorPage() {
   const receiveAmountText = useTransferStore((state) => state.receiveAmount)
   const lastEdited = useTransferStore((state) => state.lastEdited)
 
+  // const recipientNameText = useTransferStore((state)=> state.recipientName)
+
   const setDestination = useTransferStore((state) => state.setDestination)
   const setSpeed = useTransferStore((state) => state.setSpeed)
   const setService = useTransferStore((state) => state.setService)

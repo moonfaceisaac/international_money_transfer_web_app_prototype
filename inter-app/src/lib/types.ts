@@ -6,6 +6,16 @@ export type DestinationCountry = {
   flagUrl: string | null
 }
 
+export type RecipientInfo = {
+  recipientFullName: string
+  recipientBankName: string
+  recipientAccountNumber: string
+  transferPurpose: string
+  recipientEmail: string | null
+  recipientNote: string | null
+}
+
+
 export type CountryApiResponse = {
   data: {
     objects: CountryApiItem[]
@@ -54,3 +64,31 @@ export type RecipientBank = {
   id: string
   name: string
 } 
+
+
+// transaction.ts
+
+export type TransactionStatus =
+  | 'in_progress'
+  | 'completed'
+  | 'failed'
+
+export type Transaction = {
+  id: string
+  reference: string
+  recipientName: string
+  bankName: string
+  accountNumber: string
+  status: TransactionStatus
+  createdAt: string
+  sendAmount: number
+  sendCurrency: string
+  fee: number
+  totalPaid: number
+  exchangeRate: number
+  receiveAmount: number
+  receiveCurrency: string
+  paymentMethod: string
+  purpose: string
+  speed: string
+}

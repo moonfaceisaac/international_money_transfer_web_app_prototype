@@ -3,10 +3,12 @@ import {
   History, 
   Send,
 } from 'lucide-react'
-import { useState, useRef} from 'react'
+import { useRef } from 'react'
+import { useNavigate } from '@tanstack/react-router'
+
 
 export function Header(){
-    const [historyOpen, setHistoryOpen] = useState(false)
+    const navigate = useNavigate()
     const historyTriggerRef = useRef<HTMLButtonElement | null>(null)
     return(
         <>
@@ -27,7 +29,8 @@ export function Header(){
             className="inline-flex items-center gap-2 justify-self-center border-0 bg-transparent p-2 text-gray-700 hover:text-primary-600"
             onClick={(event) => {
               historyTriggerRef.current = event.currentTarget
-              setHistoryOpen(true)
+              navigate({to:'/history'})
+
             }}
           >
             <History size={16} /> History
@@ -42,31 +45,7 @@ export function Header(){
           </div>
         </div>
       </header>
-      <Dialog.Root open={historyOpen} onOpenChange={setHistoryOpen}>
-              <Dialog.Portal>
-                <Dialog.Overlay className="fixed inset-0 z-[80] bg-black/45" />
-                <Dialog.Content
-                  className="fixed top-1/2 left-1/2 z-[81] w-[min(100%-40px,420px)] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-[22px]"
-                  onCloseAutoFocus={(event) => {
-                    event.preventDefault()
-                    historyTriggerRef.current?.focus()
-                  }}
-                >
-                  <div className="flex items-center justify-between">
-                    <Dialog.Title>Recent transfers</Dialog.Title>
-                    <Dialog.Close asChild>
-                      <button type="button" aria-label="Close history">
-                        ✕
-                      </button>
-                    </Dialog.Close>
-                  </div>
-                  <Dialog.Description className="font-medium text-gray-400">
-                    Local demonstration data only.
-                  </Dialog.Description>
-                  <p>History is a mock feature in this take-home milestone.</p>
-                </Dialog.Content>
-              </Dialog.Portal>
-            </Dialog.Root>
+
         </>
         
 

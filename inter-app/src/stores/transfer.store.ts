@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type {
   DestinationCountry,
+  RecipientInfo,
   TransferService,
   TransferSpeed,
 } from '../lib/types'
@@ -15,6 +16,7 @@ type TransferState = {
   sendAmount: string
   receiveAmount: string
   lastEdited: LastEdited
+  recipient: RecipientInfo | null
   setDestination: (country: DestinationCountry | null) => void
   setSpeed: (speed: TransferSpeed) => void
   setService: (service: TransferService) => void
@@ -22,6 +24,7 @@ type TransferState = {
   setSendAmount: (amount: string) => void
   setReceiveAmount: (amount: string) => void
   setDerivedAmount: (field: LastEdited, amount: string) => void
+  setRecipient: (recipient: RecipientInfo | null) => void
 }
 
 export const useTransferStore = create<TransferState>((set) => ({
@@ -32,6 +35,7 @@ export const useTransferStore = create<TransferState>((set) => ({
   sendAmount: '1000000',
   receiveAmount: '',
   lastEdited: 'send',
+  recipient: null,
   setDestination: (destination) =>
     set({ destination, receiveAmount: '', lastEdited: 'send' }),
   setSpeed: (speed) => set({ speed }),
@@ -41,14 +45,10 @@ export const useTransferStore = create<TransferState>((set) => ({
       providerId: service === 'bank' ? 'bca' : 'gopay',
     }),
   setProviderId: (providerId) => set({ providerId }),
-  setSendAmount: (sendAmount) =>
-    set({ sendAmount, lastEdited: 'send' }),
+  setRecipient: (recipient) => set({ recipient }),
+  setSendAmount: (sendAmount) => set({ sendAmount, lastEdited: 'send' }),
   setReceiveAmount: (receiveAmount) =>
     set({ receiveAmount, lastEdited: 'receive' }),
   setDerivedAmount: (field, amount) =>
-    set(
-      field === 'send'
-        ? { receiveAmount: amount }
-        : { sendAmount: amount },
-    ),
+    set(field === 'send' ? { receiveAmount: amount } : { sendAmount: amount }),
 }))

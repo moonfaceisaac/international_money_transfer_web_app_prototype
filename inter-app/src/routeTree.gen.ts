@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HistoryRouteImport } from './routes/history'
 import { Route as RecipientRouteImport } from './routes/recipient'
 import { Route as ReviewRouteImport } from './routes/review'
 import { Route as SuccessRouteImport } from './routes/success'
@@ -17,6 +18,11 @@ import { Route as SuccessRouteImport } from './routes/success'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecipientRoute = RecipientRouteImport.update({
@@ -37,12 +43,14 @@ const SuccessRoute = SuccessRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/history': typeof HistoryRoute
   '/recipient': typeof RecipientRoute
   '/review': typeof ReviewRoute
   '/success': typeof SuccessRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/history': typeof HistoryRoute
   '/recipient': typeof RecipientRoute
   '/review': typeof ReviewRoute
   '/success': typeof SuccessRoute
@@ -50,20 +58,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/history': typeof HistoryRoute
   '/recipient': typeof RecipientRoute
   '/review': typeof ReviewRoute
   '/success': typeof SuccessRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/recipient' | '/review' | '/success'
+  fullPaths: '/' | '/history' | '/recipient' | '/review' | '/success'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/recipient' | '/review' | '/success'
-  id: '__root__' | '/' | '/recipient' | '/review' | '/success'
+  to: '/' | '/history' | '/recipient' | '/review' | '/success'
+  id: '__root__' | '/' | '/history' | '/recipient' | '/review' | '/success'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HistoryRoute: typeof HistoryRoute
   RecipientRoute: typeof RecipientRoute
   ReviewRoute: typeof ReviewRoute
   SuccessRoute: typeof SuccessRoute
@@ -76,6 +86,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/recipient': {
@@ -104,6 +121,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HistoryRoute: HistoryRoute,
   RecipientRoute: RecipientRoute,
   ReviewRoute: ReviewRoute,
   SuccessRoute: SuccessRoute,

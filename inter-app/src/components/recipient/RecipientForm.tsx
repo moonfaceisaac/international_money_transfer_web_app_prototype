@@ -14,6 +14,7 @@ import { EmailField } from './EmailField'
 import { RecipientNoteField } from './RecipientNoteField'
 import { useNavigate } from '@tanstack/react-router'
 import { useTransferStore } from '../../stores/transfer.store'
+import { Controller } from 'react-hook-form'
 
 export function RecipientForm() {
   const navigate = useNavigate()
@@ -49,12 +50,12 @@ export function RecipientForm() {
       shouldDirty: true,
     })
   }
-  const handleTranferPurposeChange = (value: string) => {
-    form.setValue('transferPurpose', value, {
-      shouldValidate: true,
-      shouldDirty: true,
-    })
-  }
+  // const handleTranferPurposeChange = (value: string) => {
+  //   form.setValue('transferPurpose', value, {
+  //     shouldValidate: true,
+  //     shouldDirty: true,
+  //   })
+  // }
   const handleEmailChange = (value: string) => {
     form.setValue('email', value, {
       shouldValidate: true,
@@ -105,12 +106,18 @@ export function RecipientForm() {
         status={undefined}
         error={form.formState.errors.accountNumber?.message}
       />
-      <TransferPurposeField
-        label="Transfer Purpose"
-        value={form.watch('transferPurpose')}
-        onChange={handleTranferPurposeChange}
-        status={undefined}
-        error={form.formState.errors.transferPurpose?.message}
+      <Controller
+        name="transferPurpose"
+        control={form.control}
+        render={({ field, fieldState }) => (
+          <TransferPurposeField
+            label="Transfer Purpose"
+            value={field.value}
+            onChange={field.onChange}
+            error={fieldState.error?.message}
+            disabled={field.disabled}
+          />
+        )}
       />
       <EmailField
         label="Email"

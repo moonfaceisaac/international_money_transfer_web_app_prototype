@@ -1,10 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import * as Dialog from '@radix-ui/react-dialog'
-import { useEffect, useRef, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { RecipientForm } from '#/components/recipient/RecipientForm'
-import { TransferSummary } from '../components/TransferSummary'
+import { useState } from 'react'
 import { useTransferSummary } from '#/hooks/useTransferSummary'
 import { useTransferStore } from '../stores/transfer.store'
 import { useTransactionStore } from '../stores/transaction.store'
@@ -15,15 +11,12 @@ import { useNavigate } from '@tanstack/react-router'
 import * as Checkbox from '@radix-ui/react-checkbox'
 import {
   Check,
-  ChevronLeft,
   Clock,
   Edit2,
-  History,
   ShieldCheck,
   X,
   ArrowRight,
   CheckCircle2,
-  ChevronDown,
 } from 'lucide-react'
 export const Route = createFileRoute('/review')({
   component: ReviewPage,
@@ -118,55 +111,8 @@ function ReviewPage() {
             </div>
           </div>
 
-          {/* --- TITLE --- */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-extrabold tracking-tight md:text-3xl">
-              Check before you send
-            </h1>
-            <p className="mt-2 hidden text-sm text-gray-500 md:block">
-              One last look. Your transfer starts as soon as you confirm and pay
-              — this step can't be undone.
-            </p>
-            <p className="mt-1 text-sm text-gray-500 md:hidden">
-              Your transfer starts once you confirm and pay.
-            </p>
-          </div>
-
-          {/* --- MOBILE ONLY: BLUE SUMMARY CARD --- */}
-          <div className="mb-6 rounded-[16px] bg-[#2e4865] p-5 text-white md:hidden">
-            <span className="text-[10px] font-bold tracking-wider text-white/70 uppercase">
-              Total to pay
-            </span>
-            <div className="mt-1 mb-4 text-3xl font-extrabold">{total}</div>
-
-            <div className="mb-4 flex flex-col gap-2 border-b border-white/10 pb-4 text-sm">
-              <div className="flex justify-between text-white/80">
-                <span>Amount</span>
-                <span className="font-medium text-white">{sendAmount}</span>
-              </div>
-              <div className="flex justify-between text-white/80">
-                <span>Fee</span>
-                <span className="font-medium text-white">{fee}</span>
-              </div>
-              <div className="flex justify-between text-white/80">
-                <span>Rate</span>
-                <span className="font-medium text-white">{rate}</span>
-              </div>
-            </div>
-
-            <div className="flex items-end justify-between">
-              <div>
-                <div className="text-xs text-white/70">Maria receives</div>
-                <div className="text-2xl font-extrabold text-[#30a6ff]">
-                  {receiveAmount}
-                </div>
-              </div>
-              <div className="flex items-center gap-1 rounded-full bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur-sm">
-                <Clock size={12} />
-                ~30 min
-              </div>
-            </div>
-          </div>
+          {heading}
+          
 
           {/* --- TRANSFER DETAILS --- */}
           <section className="mb-6">

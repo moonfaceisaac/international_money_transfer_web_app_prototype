@@ -32,7 +32,7 @@ export const useTransferStore = create<TransferState>((set) => ({
   speed: 'instant',
   service: 'bank',
   providerId: 'bca',
-  sendAmount: '1000000',
+  sendAmount: '0',
   receiveAmount: '',
   lastEdited: 'send',
   recipient: null,

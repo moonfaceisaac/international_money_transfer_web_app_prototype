@@ -173,7 +173,7 @@ function CalculatorPage() {
 
         <div className="flex flex-col items-stretch gap-[19px] pt-0 pb-7 md:grid md:grid-cols-[minmax(0,1fr)_382px] md:items-start md:gap-[52px] md:pt-[38px] md:pb-14">
           <div className="contents min-w-0 md:block">
-            <TransferStepper/>
+          <TransferStepper/>
 
             {heading}
 

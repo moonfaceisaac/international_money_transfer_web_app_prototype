@@ -4,8 +4,11 @@ import { Header } from '../components/layout/Header'
 import { useTransferStore } from '../stores/transfer.store'
 import { Check, CheckCircle2, Landmark, Star } from 'lucide-react'
 import { useTransferSummary } from '../hooks/useTransferSummary'
+import { requireCompletedTransaction } from '../lib/route-guards'
 
 export const Route = createFileRoute('/success')({
+  ssr: false,
+  beforeLoad: requireCompletedTransaction,
   component: RouteComponent,
 })
 
@@ -19,14 +22,8 @@ function RouteComponent() {
   const displayedRating = hoverRating || rating
   const ratingLabel = rating > 0 ? ratingLabels[rating - 1] : 'Select a rating'
 
-  const {
-    rate,
-    currency,
-    sendAmount,
-    receiveAmount,
-    fee,
-    total,
-  } = useTransferSummary()
+  const { rate, currency, sendAmount, receiveAmount, fee, total } =
+    useTransferSummary()
 
   return (
     <>
@@ -263,4 +260,3 @@ function RouteComponent() {
     </>
   )
 }
-

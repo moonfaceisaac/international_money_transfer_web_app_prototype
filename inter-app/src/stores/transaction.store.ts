@@ -1,4 +1,3 @@
-
 import { create } from 'zustand'
 import { persist, createJSONStorage } from 'zustand/middleware'
 
@@ -19,10 +18,7 @@ export const useTransactionStore = create<TransactionState>()(
 
       addTransaction: (transaction) =>
         set((state) => ({
-          transactions: [
-            transaction,
-            ...state.transactions,
-          ],
+          transactions: [transaction, ...state.transactions],
           activeTransactionId: transaction.id,
         })),
     }),
@@ -32,8 +28,4 @@ export const useTransactionStore = create<TransactionState>()(
       skipHydration: true,
     },
   ),
-  
 )
-console.log('Transaction store:', useTransactionStore)
-console.log('Persist API:', useTransactionStore.persist)
-console.log('Persist methods:', Object.keys(useTransactionStore.persist ?? {}))

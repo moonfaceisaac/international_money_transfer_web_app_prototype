@@ -1,14 +1,17 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState } from 'react'
+import type { ReactNode } from 'react'
 import {
   HeadContent,
   Scripts,
   createRootRoute,
+  useRouter,
 } from '@tanstack/react-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 
 import appCss from '../styles.css?url'
+import { useTransferStore } from '../stores/transfer.store'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -25,6 +28,17 @@ export const Route = createRootRoute({
   }),
   shellComponent: RootDocument,
 })
+
+function RestoreDraft() {
+  const router = useRouter()
+
+  useEffect(() => {
+    if (useTransferStore.persist.hasHydrated()) return
+    void useTransferStore.persist.rehydrate().then(() => router.invalidate())
+  }, [router])
+
+  return null
+}
 
 function RootDocument({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -47,6 +61,7 @@ function RootDocument({ children }: { children: ReactNode }) {
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
+          <RestoreDraft />
           {children}
         </QueryClientProvider>
         <TanStackDevtools

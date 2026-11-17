@@ -1,7 +1,6 @@
 import * as Popover from '@radix-ui/react-popover'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
 import { useInitialCountries, useCountrySearch } from '../../hooks/useCountries'
 import type { DestinationCountry } from '../../lib/types'
 
@@ -10,22 +9,22 @@ type Props = {
   onChange: (country: DestinationCountry) => void
 }
 
-function Flag({ country }: { country: DestinationCountry }) {
+const flagClassName =
+  'grid h-[32px] w-[32px] flex-[0_0_32px] place-items-center overflow-hidden rounded-[50%] bg-surface-icon text-[18px] text-gray-400 md:h-[36px] md:w-[36px] md:basis-[36px]'
+
+function Flag({ country }: { country: DestinationCountry | null }) {
   const [failed, setFailed] = useState(false)
 
-  if (!country.flagUrl || failed) {
+  if (!country?.flagUrl || failed) {
     return (
-      <span
-        className="grid h-[32px] w-[32px] flex-[0_0_32px] place-items-center overflow-hidden rounded-[50%] bg-surface-icon text-[18px] text-gray-400 md:h-[36px] md:w-[36px] md:basis-[36px]"
-        aria-hidden="true"
-      >
+      <span className={flagClassName} aria-hidden="true">
         ◎
       </span>
     )
   }
 
   return (
-    <span className="grid h-[32px] w-[32px] flex-[0_0_32px] place-items-center overflow-hidden rounded-[50%] bg-surface-icon text-[18px] text-gray-400 md:h-[36px] md:w-[36px] md:basis-[36px]">
+    <span className={flagClassName}>
       <img
         className="h-full w-full object-cover"
         src={country.flagUrl}
@@ -42,7 +41,7 @@ export function CountryCombobox({ value, onChange }: Props) {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [activeIndex, setActiveIndex] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
-  const queryClient = useQueryClient()
+  const listboxId = useId()
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -52,16 +51,26 @@ export function CountryCombobox({ value, onChange }: Props) {
     return () => window.clearTimeout(timeout)
   }, [search])
 
-  const initialQuery = useInitialCountries()
+  const initialQuery = useInitialCountries(open)
   const searchQuery = useCountrySearch(debouncedSearch, open)
-  const countries = useMemo(
-    () => (debouncedSearch ? searchQuery.data : initialQuery.data) ?? [],
-    [debouncedSearch, initialQuery.data, searchQuery.data],
-  )
-  const loading = debouncedSearch
-    ? searchQuery.isFetching
-    : initialQuery.isLoading
-  const error = debouncedSearch ? searchQuery.error : initialQuery.error
+  const activeQuery = debouncedSearch ? searchQuery : initialQuery
+  const searchPending = search.trim() !== debouncedSearch
+  const loading = searchPending || (activeQuery.isFetching && !activeQuery.data)
+  const error = loading ? null : activeQuery.error
+  const countries = loading || error ? [] : (activeQuery.data ?? [])
+  const visibleActiveIndex = Math.min(activeIndex, countries.length - 1)
+  const activeOptionId =
+    visibleActiveIndex >= 0
+      ? `${listboxId}-option-${visibleActiveIndex}`
+      : undefined
+
+  useEffect(() => {
+    if (open && activeOptionId) {
+      document.getElementById(activeOptionId)?.scrollIntoView({
+        block: 'nearest',
+      })
+    }
+  }, [open, activeOptionId, countries])
 
   useEffect(() => {
     if (open) {
@@ -81,21 +90,20 @@ export function CountryCombobox({ value, onChange }: Props) {
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'ArrowDown') {
       event.preventDefault()
-      setActiveIndex((current) => Math.min(current + 1, countries.length - 1))
+      if (countries.length > 0) {
+        setActiveIndex(Math.min(visibleActiveIndex + 1, countries.length - 1))
+      }
     } else if (event.key === 'ArrowUp') {
       event.preventDefault()
-      setActiveIndex((current) => Math.max(current - 1, 0))
+      setActiveIndex(Math.max(visibleActiveIndex - 1, 0))
     } else if (event.key === 'Enter') {
       event.preventDefault()
-      const country = countries[activeIndex]
-      if (country) selectCountry(country)
+      if (visibleActiveIndex >= 0) {
+        selectCountry(countries[visibleActiveIndex])
+      }
     } else if (event.key === 'Escape') {
       setOpen(false)
     }
-  }
-
-  const refreshInitial = () => {
-    void queryClient.invalidateQueries({ queryKey: ['countries', 'initial'] })
   }
 
   return (
@@ -105,39 +113,19 @@ export function CountryCombobox({ value, onChange }: Props) {
           type="button"
           className="flex min-h-[57px] w-full items-center gap-[12px] rounded-control-mobile border border-gray-100 bg-gray-50 px-[12px] py-[8px] text-left text-gray-900 hover:border-primary-500 contrast-more:border-gray-700 md:min-h-[64px] md:rounded-control md:px-[16px] md:py-[10px]"
           id="destination-country"
-          aria-label="Choose destination country"
+          aria-label={`Destination country: ${value?.name ?? 'Select destination country'}`}
         >
-          {value ? (
-            <>
-              <Flag country={value} />
-              <span className="grid min-w-0 flex-1 gap-[1px]">
-                <strong className="text-[14px] font-extrabold md:text-[15px]">
-                  {value.name}
-                </strong>
-                <small className="text-[12px] text-gray-400">
-                  {value.currencyCode ?? 'Currency unavailable'}
-                  {value.currencyCode ? ` · ${value.currencyCode}` : ''}
-                </small>
-              </span>
-            </>
-          ) : (
-            <>
-              <span
-                className="grid h-[32px] w-[32px] flex-[0_0_32px] place-items-center overflow-hidden rounded-[50%] bg-surface-icon text-[18px] text-gray-400 md:h-[36px] md:w-[36px] md:basis-[36px]"
-                aria-hidden="true"
-              >
-                ◎
-              </span>
-              <span className="grid min-w-0 flex-1 gap-[1px]">
-                <strong className="text-[14px] font-extrabold md:text-[15px]">
-                  Select destination country
-                </strong>
-                <small className="text-[12px] text-gray-400">
-                  Choose where the money will be received
-                </small>
-              </span>
-            </>
-          )}
+          <Flag country={value} />
+          <span className="grid min-w-0 flex-1 gap-[1px]">
+            <strong className="text-[14px] font-extrabold md:text-[15px]">
+              {value?.name ?? 'Select destination country'}
+            </strong>
+            <small className="text-[12px] text-gray-400">
+              {value
+                ? (value.currencyCode ?? 'Currency unavailable')
+                : 'Choose where the money will be received'}
+            </small>
+          </span>
           <span aria-hidden="true">⌄</span>
         </button>
       </Popover.Trigger>
@@ -154,7 +142,8 @@ export function CountryCombobox({ value, onChange }: Props) {
             aria-label="Search countries"
             role="combobox"
             aria-expanded={open}
-            aria-controls="country-options"
+            aria-controls={listboxId}
+            aria-activedescendant={activeOptionId}
             aria-autocomplete="list"
             placeholder="Search country..."
             value={search}
@@ -165,7 +154,7 @@ export function CountryCombobox({ value, onChange }: Props) {
             onKeyDown={handleKeyDown}
           />
           <div
-            id="country-options"
+            id={listboxId}
             className="max-h-[290px] overflow-y-auto p-[5px]"
             role="listbox"
             aria-label="Countries"
@@ -184,7 +173,10 @@ export function CountryCombobox({ value, onChange }: Props) {
                 role="alert"
               >
                 Couldn't load countries.{' '}
-                <button type="button" onClick={refreshInitial}>
+                <button
+                  type="button"
+                  onClick={() => void activeQuery.refetch()}
+                >
                   Try again
                 </button>
               </div>
@@ -200,11 +192,13 @@ export function CountryCombobox({ value, onChange }: Props) {
                 <button
                   type="button"
                   role="option"
+                  id={`${listboxId}-option-${index}`}
+                  data-active={index === visibleActiveIndex}
                   aria-selected={
                     value?.alpha2 === country.alpha2 &&
                     value.name === country.name
                   }
-                  className="flex w-full items-center gap-[10px] rounded-[8px] border-0 bg-gray-50 p-[9px] text-left text-gray-900 hover:bg-surface-option aria-selected:bg-surface-option"
+                  className="flex w-full items-center gap-[10px] rounded-[8px] border-0 bg-gray-50 p-[9px] text-left text-gray-900 hover:bg-surface-option aria-selected:bg-surface-option data-[active=true]:bg-surface-option"
                   key={`${country.alpha2 ?? country.name}-${country.currencyCode ?? 'none'}`}
                   onMouseEnter={() => setActiveIndex(index)}
                   onClick={() => selectCountry(country)}

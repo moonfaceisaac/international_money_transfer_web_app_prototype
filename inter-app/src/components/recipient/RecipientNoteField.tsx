@@ -1,4 +1,3 @@
-
 import { FormField } from '../ui/FormField'
 
 type Props = {
@@ -23,11 +22,7 @@ export function RecipientNoteField({
   const characterCounter = value.length
 
   return (
-    <FormField
-      label={label}
-      htmlFor="recipient-note"
-      className="w-full"
-    >
+    <FormField label={label} htmlFor="recipient-note" className="w-full">
       <div
         className={`relative rounded-control-mobile md:rounded-control ${
           active
@@ -70,11 +65,7 @@ export function RecipientNoteField({
         </span>
       )}
 
-      {status && (
-        <span className="font-medium text-green-500">
-          {status}
-        </span>
-      )}
+      {status && <span className="font-medium text-green-500">{status}</span>}
     </FormField>
   )
 }

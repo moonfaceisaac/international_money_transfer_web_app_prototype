@@ -10,6 +10,11 @@ type Props = {
   supported: boolean
 }
 
+const summaryRowClassName =
+  'mt-[10px] flex justify-between gap-[14px] text-[12px] text-blue-300 md:mt-[12px]'
+const summaryValueClassName =
+  'text-right text-[12px] font-extrabold text-gray-50'
+
 export function TransferSummary({
   sendAmount,
   receiveAmount,
@@ -32,21 +37,21 @@ export function TransferSummary({
         IDR {formatAmount(sendAmount)}
       </p>
       <div className="my-[13px] h-[1px] bg-blue-200/24 md:my-[16px]" />
-      <div className="mt-[10px] flex justify-between gap-[14px] text-[12px] text-blue-300 md:mt-[12px]">
+      <div className={summaryRowClassName}>
         <span>Transfer fee (Bank Admin + Speed Admin)</span>
-        <strong className="text-right text-[12px] font-extrabold text-gray-50">
+        <strong className={summaryValueClassName}>
           IDR {formatAmount(fee)}
         </strong>
-    </div>
-      <div className="mt-[10px] flex justify-between gap-[14px] text-[12px] text-blue-300 md:mt-[12px]">
+      </div>
+      <div className={summaryRowClassName}>
         <span>Total to pay (What you send + Transfer Fee)</span>
-        <strong className="text-right text-[12px] font-extrabold text-gray-50">
+        <strong className={summaryValueClassName}>
           IDR {formatAmount(total)}
         </strong>
       </div>
-      <div className="mt-[10px] flex justify-between gap-[14px] text-[12px] text-blue-300 md:mt-[12px]">
+      <div className={summaryRowClassName}>
         <span>Rate applied</span>
-        <strong className="text-right text-[12px] font-extrabold text-gray-50">
+        <strong className={summaryValueClassName}>
           {rate ? `1 IDR = ${rate.toPrecision(6)} ${currency}` : 'Unavailable'}
         </strong>
       </div>

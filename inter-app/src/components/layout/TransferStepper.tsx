@@ -1,4 +1,3 @@
-
 import { useRouterState } from '@tanstack/react-router'
 import { transferSteps } from '../../config/transferSteps'
 
@@ -7,14 +6,12 @@ export function TransferStepper() {
     select: (state) => state.location.pathname,
   })
 
-  const activeIndex = transferSteps.findIndex(
-    (step) => step.to === pathname,
-  )
+  const activeIndex = transferSteps.findIndex((step) => step.to === pathname)
+
+  if (activeIndex === -1) return null
 
   const currentStep = transferSteps[activeIndex]
   const progress = ((activeIndex + 1) / transferSteps.length) * 100
-
-  if (!currentStep) return null
 
   return (
     <nav aria-label="Transfer progress">
@@ -64,9 +61,7 @@ export function TransferStepper() {
             Step {activeIndex + 1} of {transferSteps.length}
           </span>
 
-          <strong className="text-primary-600">
-            {currentStep.label}
-          </strong>
+          <strong className="text-primary-600">{currentStep.label}</strong>
         </div>
 
         <div

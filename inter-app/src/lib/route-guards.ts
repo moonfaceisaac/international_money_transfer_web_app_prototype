@@ -1,11 +1,15 @@
-
 import { redirect } from '@tanstack/react-router'
 
 import { useTransferStore } from '../stores/transfer.store'
 import { useTransactionStore } from '../stores/transaction.store'
 import { parseAmount } from './utils/money'
 
-export function requireTransfer() {
+export async function requireTransfer() {
+  if (typeof window === 'undefined') return
+  if (!useTransferStore.persist.hasHydrated()) {
+    await useTransferStore.persist.rehydrate()
+  }
+
   const { destination, sendAmount } = useTransferStore.getState()
 
   const amount = parseAmount(sendAmount)
@@ -15,8 +19,9 @@ export function requireTransfer() {
   }
 }
 
-export function requireRecipient() {
-  requireTransfer()
+export async function requireRecipient() {
+  await requireTransfer()
+  if (typeof window === 'undefined') return
 
   const { recipient } = useTransferStore.getState()
 
@@ -25,20 +30,24 @@ export function requireRecipient() {
   }
 }
 
-export async function requireCompletedTransaction() {
- 
+let pendingSuccessTransactionId: string | null = null
+
+export function allowSuccessForTransaction(id: string) {
+  pendingSuccessTransactionId = id
+}
+
+export function requireCompletedTransaction() {
   if (typeof window === 'undefined') return
 
-  await useTransactionStore.persist.rehydrate()
+  const confirmedId = pendingSuccessTransactionId
+  pendingSuccessTransactionId = null
+  const { activeTransactionId, transactions } = useTransactionStore.getState()
 
-  const { activeTransactionId, transactions } =
-    useTransactionStore.getState()
-
-  const hasActiveTransaction = transactions.some(
-    (transaction) => transaction.id === activeTransactionId,
-  )
-
-  if (!activeTransactionId || !hasActiveTransaction) {
+  if (
+    !confirmedId ||
+    activeTransactionId !== confirmedId ||
+    !transactions.some((transaction) => transaction.id === confirmedId)
+  ) {
     throw redirect({ to: '/' })
   }
 }

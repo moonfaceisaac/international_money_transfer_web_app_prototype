@@ -2,7 +2,11 @@ import type { TransferProvider } from '../lib/types'
 
 export const banks: TransferProvider[] = [
   { id: 'bca', name: 'BCA', fees: { instant: 35000, regular: 15000 } },
-  { id: 'mandiri', name: 'Bank Mandiri', fees: { instant: 30000, regular: 12000 } },
+  {
+    id: 'mandiri',
+    name: 'Bank Mandiri',
+    fees: { instant: 30000, regular: 12000 },
+  },
   { id: 'bni', name: 'BNI', fees: { instant: 30000, regular: 12000 } },
   { id: 'bri', name: 'BRI', fees: { instant: 30000, regular: 12000 } },
 ]

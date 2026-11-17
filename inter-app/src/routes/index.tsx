@@ -354,7 +354,6 @@ function CalculatorPage() {
             currency={currency}
             rate={rate}
             supported={supported}
-           
           />
 
           {errors.sendAmount?.message && (

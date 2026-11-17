@@ -12,22 +12,19 @@ export const recipientSchema = z.object({
   fullName: z.string().min(1, 'Name is required'),
 
   transferPurpose: z
-  .string()
-  .min(1, 'Please select a transfer purpose')
-  .refine(
-    (value) =>
-      transferPurposes.some((purpose) => purpose.value === value),
-    'Please select a valid transfer purpose',
-  ),
-  
+    .string()
+    .min(1, 'Please select a transfer purpose')
+    .refine(
+      (value) => transferPurposes.some((purpose) => purpose.value === value),
+      'Please select a valid transfer purpose',
+    ),
+
   email: z
     .string()
     .email('Please enter a valid email address')
     .or(z.literal('')),
 
-  recipientNote: z
-    .string()
-    .max(255, 'Note cannot exceed 255 characters'),
+  recipientNote: z.string().max(255, 'Note cannot exceed 255 characters'),
 })
 
 export type RecipientFormValues = z.infer<typeof recipientSchema>

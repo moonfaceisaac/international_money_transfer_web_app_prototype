@@ -1,56 +1,51 @@
-import { FormField } from "../ui/FormField"
+import { FormField } from '../ui/FormField'
+import { fieldControlClassName, fieldInputClassName } from '../ui/fieldStyles'
 
 type Props = {
-    label: string
-    value: string
-    status?: string
-    error?: string
-    disabled?: boolean
-    active?: boolean
-    onChange: (value: string) => void
-    
+  label: string
+  value: string
+  status?: string
+  error?: string
+  disabled?: boolean
+  active?: boolean
+  onChange: (value: string) => void
 }
 
 export function AccountNumberField({
-    label,
-    value,
-    status,
-    error,
-    disabled = false,
-    active = false,
-    onChange,
+  label,
+  value,
+  status,
+  error,
+  disabled = false,
+  active = false,
+  onChange,
 }: Props) {
-    return (
-        <FormField
-            label={label}
-            htmlFor="account-number"
-            className="w-full"
+  return (
+    <FormField label={label} htmlFor="account-number" className="w-full">
+      <div className={fieldControlClassName(active)}>
+        <input
+          id="account-number"
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? 'account-number-error' : undefined}
+          className={fieldInputClassName}
+          inputMode="numeric"
+          type="text"
+          value={value}
+          disabled={disabled}
+          placeholder="Recipient's Account Number field"
+          onChange={(event) => onChange(event.target.value)}
+        ></input>
+      </div>
+      {error && (
+        <span
+          id="account-number-error"
+          className="text-sm font-medium text-red-500"
         >
-        <div
-        className={`flex h-[63px] items-center gap-3 rounded-control-mobile pr-[13px] focus-within:border-primary-500 md:h-[70px] md:rounded-control md:pr-[14px] ${
-          active
-            ? 'border-2 border-primary-500 pl-3 md:pl-[18px]'
-            : 'border-[1.5px] border-gray-100 pl-[13px] contrast-more:border-gray-700 md:pl-[19px]'
-        }`}
-        >
-            <input
-                id="account-number"
-                className="w-full min-w-0 border-0 bg-transparent text-[24px] font-extrabold tracking-[-0.5px] text-gray-900 outline-none focus-visible:outline-none md:text-[28px]"
-                inputMode="numeric"
-                type="text"
-                value={value}
-                disabled={disabled}
-                placeholder="Recipient's Account Number field"
-                onChange={(event) => onChange(event.target.value)}
-            >
-            </input>
-        </div>
-        {error &&(
-        <span className='text-sm font-medium text-red-500'>
-            {error}
-        </span>)}
+          {error}
+        </span>
+      )}
 
-        {status && <span className="font-medium text-green-500">{status}</span>}
-        </FormField>
-    )
+      {status && <span className="font-medium text-green-500">{status}</span>}
+    </FormField>
+  )
 }

@@ -1,11 +1,12 @@
 import { FormField } from '../ui/FormField'
+import { fieldControlClassName, fieldInputClassName } from '../ui/fieldStyles'
 
 type Props = {
   label: string
   value: string
   currency: string
   variant: 'send' | 'receive'
-  balance?: string
+
   status?: string
   disabled?: boolean
   active?: boolean
@@ -27,15 +28,11 @@ export function AmountField({
   return (
     <FormField label={label} htmlFor={`amount-${currency}`} className="w-full">
       <div
-        className={`flex h-[63px] items-center gap-3 rounded-control-mobile pr-[13px] focus-within:border-primary-500 md:h-[70px] md:rounded-control md:pr-[14px] ${
-          active
-            ? 'border-2 border-primary-500 pl-3 md:pl-[18px]'
-            : 'border-[1.5px] border-gray-100 pl-[13px] contrast-more:border-gray-700 md:pl-[19px]'
-        } ${isRecipient ? 'bg-surface' : 'bg-white'}`}
+        className={`${fieldControlClassName(active)} ${isRecipient ? 'bg-surface' : 'bg-white'}`}
       >
         <input
           id={`amount-${currency}`}
-          className="w-full min-w-0 border-0 bg-transparent text-[24px] font-extrabold tracking-[-0.5px] text-gray-900 outline-none focus-visible:outline-none md:text-[28px]"
+          className={fieldInputClassName}
           inputMode="decimal"
           type="text"
           value={value}

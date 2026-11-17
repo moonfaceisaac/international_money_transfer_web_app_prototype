@@ -15,10 +15,9 @@ export type RecipientInfo = {
   recipientNote: string | null
 }
 
-
 export type CountryApiResponse = {
-  data: {
-    objects: CountryApiItem[]
+  data?: {
+    objects?: CountryApiItem[]
   }
 }
 
@@ -54,7 +53,7 @@ export type FeeRules = {
 }
 
 export type TransferProvider = {
-  id: string 
+  id: string
   name: string
   logo?: string
   fees: FeeRules
@@ -63,15 +62,11 @@ export type TransferProvider = {
 export type RecipientBank = {
   id: string
   name: string
-} 
-
+}
 
 // transaction.ts
 
-export type TransactionStatus =
-  | 'in_progress'
-  | 'completed'
-  | 'failed'
+export type TransactionStatus = 'in_progress' | 'completed' | 'failed'
 
 export type Transaction = {
   id: string

@@ -15,5 +15,3 @@ export const transferSchema = z.object({
 })
 
 export type TransferFormValues = z.infer<typeof transferSchema>
-
-

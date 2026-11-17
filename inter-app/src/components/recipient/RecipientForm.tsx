@@ -1,11 +1,10 @@
-import { useForm } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
+import { useEffect } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight, ShieldCheck } from 'lucide-react'
 
-import {
-  recipientSchema,
-  type RecipientFormValues,
-} from '../../schemas/recipient.schema'
+import { recipientSchema } from '../../schemas/recipient.schema'
+import type { RecipientFormValues } from '../../schemas/recipient.schema'
 import { FullNameField } from './FullNameField'
 import { BankNameField } from './BankNameField'
 import { AccountNumberField } from './AccountNumberField'
@@ -14,11 +13,11 @@ import { EmailField } from './EmailField'
 import { RecipientNoteField } from './RecipientNoteField'
 import { useNavigate } from '@tanstack/react-router'
 import { useTransferStore } from '../../stores/transfer.store'
-import { Controller } from 'react-hook-form'
 
 export function RecipientForm() {
   const navigate = useNavigate()
   const setRecipient = useTransferStore((state) => state.setRecipient)
+  const setRecipientDraft = useTransferStore((state) => state.setRecipientDraft)
 
   const form = useForm<RecipientFormValues>({
     resolver: zodResolver(recipientSchema),
@@ -32,46 +31,51 @@ export function RecipientForm() {
       recipientNote: '',
     },
   })
+  useEffect(() => {
+    const restore = () => form.reset(useTransferStore.getState().recipientDraft)
+    if (useTransferStore.persist.hasHydrated()) restore()
+    return useTransferStore.persist.onFinishHydration(restore)
+  }, [form.reset])
+
   const handleFullNameChange = (value: string) => {
     form.setValue('fullName', value, {
       shouldValidate: true,
       shouldDirty: true,
     })
+    setRecipientDraft({ fullName: value })
   }
   const handleBankChange = (value: string) => {
     form.setValue('bank', value, {
       shouldValidate: true,
       shouldDirty: true,
     })
+    setRecipientDraft({ bank: value })
   }
   const handleAccountNumberChange = (value: string) => {
     form.setValue('accountNumber', value, {
       shouldValidate: true,
       shouldDirty: true,
     })
+    setRecipientDraft({ accountNumber: value })
   }
-  // const handleTranferPurposeChange = (value: string) => {
-  //   form.setValue('transferPurpose', value, {
-  //     shouldValidate: true,
-  //     shouldDirty: true,
-  //   })
-  // }
+
   const handleEmailChange = (value: string) => {
     form.setValue('email', value, {
       shouldValidate: true,
       shouldDirty: true,
     })
+    setRecipientDraft({ email: value })
   }
   const handleRecipientNoteField = (value: string) => {
     form.setValue('recipientNote', value, {
       shouldValidate: true,
       shouldDirty: true,
     })
+    setRecipientDraft({ recipientNote: value })
   }
   const canContinue = form.formState.isValid
 
   const onSubmit = (values: RecipientFormValues) => {
-    console.log(values)
     setRecipient({
       recipientFullName: values.fullName,
       recipientBankName: values.bank,
@@ -96,14 +100,12 @@ export function RecipientForm() {
         label="Bank Name"
         value={form.watch('bank')}
         onChange={handleBankChange}
-        status={undefined}
         error={form.formState.errors.bank?.message}
       />
       <AccountNumberField
         label="Account Number"
         value={form.watch('accountNumber')}
         onChange={handleAccountNumberChange}
-        status={undefined}
         error={form.formState.errors.accountNumber?.message}
       />
       <Controller
@@ -113,7 +115,10 @@ export function RecipientForm() {
           <TransferPurposeField
             label="Transfer Purpose"
             value={field.value}
-            onChange={field.onChange}
+            onChange={(value) => {
+              field.onChange(value)
+              setRecipientDraft({ transferPurpose: value })
+            }}
             error={fieldState.error?.message}
             disabled={field.disabled}
           />
@@ -123,21 +128,18 @@ export function RecipientForm() {
         label="Email"
         value={form.watch('email')}
         onChange={handleEmailChange}
-        status={undefined}
         error={form.formState.errors.email?.message}
       />
       <RecipientNoteField
         label="Note to Recipient"
         value={form.watch('recipientNote')}
         onChange={handleRecipientNoteField}
-        status={undefined}
         error={form.formState.errors.recipientNote?.message}
       />
       <button
         type="submit"
         className="order-3 mt-0 flex min-h-[54px] w-full items-center justify-center gap-[10px] rounded-[11px] border-0 bg-primary-600 text-[14px] font-extrabold text-white enabled:hover:bg-primary-hover disabled:opacity-50 md:order-none md:mt-6 md:min-h-[53px] md:w-[268px]"
         disabled={!canContinue}
-        onClick={handleContinue}
       >
         Continue <ArrowRight size={18} />
       </button>

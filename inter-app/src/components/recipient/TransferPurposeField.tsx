@@ -27,6 +27,7 @@ export function TransferPurposeField({
         <Select.Trigger
           id="transfer-purpose"
           aria-invalid={Boolean(error)}
+          aria-describedby={error ? 'transfer-purpose-error' : undefined}
           className={`flex h-[63px] w-full items-center justify-between gap-3 rounded-control-mobile pr-[13px] text-left outline-none focus-visible:border-primary-500 md:h-[70px] md:rounded-control md:pr-[14px] ${
             active
               ? 'border-2 border-primary-500 pl-3 md:pl-[18px]'
@@ -68,7 +69,12 @@ export function TransferPurposeField({
       </Select.Root>
 
       {error && (
-        <span className="text-sm font-medium text-red-500">{error}</span>
+        <span
+          id="transfer-purpose-error"
+          className="text-sm font-medium text-red-500"
+        >
+          {error}
+        </span>
       )}
 
       {status && <span className="font-medium text-green-500">{status}</span>}

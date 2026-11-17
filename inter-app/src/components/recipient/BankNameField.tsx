@@ -4,6 +4,7 @@ import { Check, ChevronDown } from 'lucide-react'
 import { banks } from '../../mock/recipientBank'
 
 import { FormField } from '../ui/FormField'
+import { fieldControlClassName, fieldInputClassName } from '../ui/fieldStyles'
 
 type Props = {
   label: string
@@ -14,8 +15,6 @@ type Props = {
   active?: boolean
   onChange: (value: string) => void
 }
-
-
 
 export function BankNameField({
   label,
@@ -28,32 +27,32 @@ export function BankNameField({
 }: Props) {
   const [open, setOpen] = useState(false)
   const [search, setSearch] = useState('')
+  const [activeBankId, setActiveBankId] = useState<string | null>(null)
 
-  const filteredBanks = banks.filter((banks) =>
-    banks.name.toLowerCase().includes(search.toLowerCase()),
+  const filteredBanks = banks.filter((bank) =>
+    bank.name.toLowerCase().includes(search.toLowerCase()),
   )
+
+  const activeBank = filteredBanks.find((bank) => bank.id === activeBankId)
 
   const handleSelect = (bank: string) => {
     onChange(bank)
     setSearch('')
+    setActiveBankId(null)
     setOpen(false)
   }
 
   return (
-    <FormField
-      label={label}
-      htmlFor="bank-name"
-      className="w-full"
-    >
-      <Popover.Root open={open} onOpenChange={setOpen}>
+    <FormField label={label} htmlFor="bank-name" className="w-full">
+      <Popover.Root
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen)
+          if (!nextOpen) setActiveBankId(null)
+        }}
+      >
         <Popover.Anchor asChild>
-          <div
-            className={`flex h-[63px] items-center gap-3 rounded-control-mobile pr-[13px] focus-within:border-primary-500 md:h-[70px] md:rounded-control md:pr-[14px] ${
-              active
-                ? 'border-2 border-primary-500 pl-3 md:pl-[18px]'
-                : 'border-[1.5px] border-gray-100 pl-[13px] contrast-more:border-gray-700 md:pl-[19px]'
-            }`}
-          >
+          <div className={fieldControlClassName(active)}>
             <input
               id="bank-name"
               role="combobox"
@@ -61,23 +60,59 @@ export function BankNameField({
               aria-expanded={open}
               aria-controls="bank-name-listbox"
               aria-haspopup="listbox"
-              className="w-full min-w-0 border-0 bg-transparent text-[24px] font-extrabold tracking-[-0.5px] text-gray-900 outline-none focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 md:text-[28px]"
+              aria-activedescendant={
+                open && activeBank
+                  ? `bank-name-option-${activeBank.id}`
+                  : undefined
+              }
+              aria-invalid={Boolean(error)}
+              aria-describedby={error ? 'bank-name-error' : undefined}
+              className={`${fieldInputClassName} disabled:cursor-not-allowed disabled:opacity-50`}
               type="text"
               value={open ? search : value}
               disabled={disabled}
               placeholder="Recipient's bank name"
               onFocus={() => {
-                setSearch(value)
+                setSearch('')
+                setActiveBankId(null)
                 setOpen(true)
               }}
               onChange={(event) => {
                 setSearch(event.target.value)
+                setActiveBankId(null)
                 setOpen(true)
               }}
               onKeyDown={(event) => {
-                if (event.key === 'Escape') {
+                if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+                  event.preventDefault()
+                  if (!open) {
+                    setSearch('')
+                    setActiveBankId(
+                      event.key === 'ArrowDown'
+                        ? (banks[0]?.id ?? null)
+                        : (banks[banks.length - 1]?.id ?? null),
+                    )
+                    setOpen(true)
+                  } else if (filteredBanks.length > 0) {
+                    const index = filteredBanks.findIndex(
+                      (bank) => bank.id === activeBankId,
+                    )
+                    const nextIndex =
+                      event.key === 'ArrowDown'
+                        ? (index + 1) % filteredBanks.length
+                        : index === -1
+                          ? filteredBanks.length - 1
+                          : (index - 1 + filteredBanks.length) %
+                            filteredBanks.length
+                    setActiveBankId(filteredBanks[nextIndex].id)
+                  }
+                } else if (event.key === 'Enter' && open && activeBank) {
+                  event.preventDefault()
+                  handleSelect(activeBank.name)
+                } else if (event.key === 'Escape') {
                   setOpen(false)
                   setSearch('')
+                  setActiveBankId(null)
                 }
               }}
             />
@@ -112,18 +147,19 @@ export function BankNameField({
               className="max-h-60 overflow-y-auto"
             >
               {filteredBanks.length > 0 ? (
-                filteredBanks.map((banks) => (
+                filteredBanks.map((bank) => (
                   <button
-                    key={banks.id}
+                    key={bank.id}
+                    id={`bank-name-option-${bank.id}`}
                     type="button"
                     role="option"
-                    aria-selected={value === banks.name}
-                    onClick={() => handleSelect(banks.name)}
+                    aria-selected={value === bank.name}
+                    onClick={() => handleSelect(bank.name)}
                     className="flex w-full items-center justify-between rounded-lg px-3 py-3 text-left text-sm font-medium text-gray-900 hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none"
                   >
-                    {banks.name}
+                    {bank.name}
 
-                    {value === banks.name && (
+                    {value === bank.name && (
                       <Check size={16} className="text-primary-500" />
                     )}
                   </button>
@@ -137,15 +173,13 @@ export function BankNameField({
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>
-        
-      {error &&(
-        <span className='text-sm font-medium text-red-500'>
-            {error}
+
+      {error && (
+        <span id="bank-name-error" className="text-sm font-medium text-red-500">
+          {error}
         </span>
       )}
-      {status && (
-        <span className="font-medium text-green-500">{status}</span>
-      )}
+      {status && <span className="font-medium text-green-500">{status}</span>}
     </FormField>
   )
 }

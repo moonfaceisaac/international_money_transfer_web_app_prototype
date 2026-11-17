@@ -1,27 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import * as Dialog from '@radix-ui/react-dialog'
-import { useEffect, useRef, useState, useMemo} from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { RecipientForm } from '#/components/recipient/RecipientForm'
-import { TransferSummary } from '../components/TransferSummary'
-import { useTransferSummary } from '#/hooks/useTransferSummary'
-import { useTransferStore } from '../stores/transfer.store'
+import { useEffect, useMemo, useState } from 'react'
 import { Header } from '../components/layout/Header'
-import { TransferStepper } from '#/components/layout/TransferStepper'
 
-import {
-  Plus,
-  CheckCircle2,
-  Circle,
-  ChevronDown,
-} from 'lucide-react'
+import { Plus, CheckCircle2, Circle, ChevronDown } from 'lucide-react'
 
 import { useTransactionStore } from '../stores/transaction.store'
-import type {
-  Transaction,
-  TransactionStatus,
-} from '../lib/types'
+import type { Transaction, TransactionStatus } from '../lib/types'
 
 export const Route = createFileRoute('/history')({
   component: RouteComponent,
@@ -81,11 +65,7 @@ function StatusBadge({ status }: { status: TransactionStatus }) {
   )
 }
 
-function TransferProgress({
-  status,
-}: {
-  status: TransactionStatus
-}) {
+function TransferProgress({ status }: { status: TransactionStatus }) {
   if (status === 'failed') {
     return (
       <p className="rounded-lg bg-red-50 px-3 py-2 text-[11px] font-bold text-red-500">
@@ -99,23 +79,15 @@ function TransferProgress({
   return (
     <div className="flex items-center rounded-[11px] bg-surface px-3 py-3">
       <div className="flex shrink-0 items-center gap-1.5">
-        <CheckCircle2
-          size={16}
-          className="fill-green-500 text-white"
-        />
-        <span className="text-[10px] font-bold text-gray-700">
-          Paid
-        </span>
+        <CheckCircle2 size={16} className="fill-green-500 text-white" />
+        <span className="text-[10px] font-bold text-gray-700">Paid</span>
       </div>
 
       <div className="mx-2 h-[2px] min-w-2 flex-1 bg-green-500" />
 
       <div className="flex shrink-0 items-center gap-1.5">
         {completed ? (
-          <CheckCircle2
-            size={16}
-            className="fill-green-500 text-white"
-          />
+          <CheckCircle2 size={16} className="fill-green-500 text-white" />
         ) : (
           <span className="grid size-4 place-items-center rounded-full bg-primary-600 text-[9px] font-bold text-white">
             2
@@ -134,16 +106,11 @@ function TransferProgress({
 
       <div className="flex shrink-0 items-center gap-1.5">
         {completed ? (
-          <CheckCircle2
-            size={16}
-            className="fill-green-500 text-white"
-          />
+          <CheckCircle2 size={16} className="fill-green-500 text-white" />
         ) : (
           <Circle size={16} className="text-gray-200" />
         )}
-        <span className="text-[10px] text-gray-400">
-          Delivered
-        </span>
+        <span className="text-[10px] text-gray-400">Delivered</span>
       </div>
     </div>
   )
@@ -206,10 +173,7 @@ function TransactionCard({
         <div className="flex items-center justify-end gap-2">
           <div className="text-right">
             <p className="whitespace-nowrap text-[12px] font-extrabold text-gray-950">
-              −{formatMoney(
-                transaction.sendAmount,
-                transaction.sendCurrency,
-              )}
+              −{formatMoney(transaction.sendAmount, transaction.sendCurrency)}
             </p>
             <p className="text-[10px] text-gray-400">
               {transaction.status === 'failed'
@@ -240,7 +204,8 @@ function TransactionCard({
             <p className="text-[11px] font-bold text-gray-900">
               Transfer {transaction.reference}
               <span className="font-medium text-gray-400">
-                {' '}· {transaction.speed} transfer
+                {' '}
+                · {transaction.speed} transfer
               </span>
             </p>
           </div>
@@ -258,10 +223,7 @@ function TransactionCard({
 
             <Detail
               label="FEE"
-              value={formatMoney(
-                transaction.fee,
-                transaction.sendCurrency,
-              )}
+              value={formatMoney(transaction.fee, transaction.sendCurrency)}
             />
 
             <Detail
@@ -277,15 +239,9 @@ function TransactionCard({
               value={`1 ${transaction.sendCurrency} = ${transaction.exchangeRate} ${transaction.receiveCurrency}`}
             />
 
-            <Detail
-              label="PAID WITH"
-              value={transaction.paymentMethod}
-            />
+            <Detail label="PAID WITH" value={transaction.paymentMethod} />
 
-            <Detail
-              label="PURPOSE"
-              value={transaction.purpose}
-            />
+            <Detail label="PURPOSE" value={transaction.purpose} />
           </div>
         </div>
       )}
@@ -293,13 +249,7 @@ function TransactionCard({
   )
 }
 
-function Detail({
-  label,
-  value,
-}: {
-  label: string
-  value: string
-}) {
+function Detail({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0">
       <p className="mb-[3px] text-[9px] font-extrabold text-gray-400">
@@ -313,9 +263,7 @@ function Detail({
 }
 
 function RouteComponent() {
-  const transactions = useTransactionStore(
-    (state) => state.transactions,
-  )
+  const transactions = useTransactionStore((state) => state.transactions)
 
   const [activeFilter, setActiveFilter] = useState<Filter>('all')
   const [expandedId, setExpandedId] = useState<string | null>('txn-001')
@@ -329,52 +277,23 @@ function RouteComponent() {
     () =>
       [...transactions].sort(
         (a, b) =>
-          new Date(b.createdAt).getTime() -
-          new Date(a.createdAt).getTime(),
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       ),
     [transactions],
   )
 
-  const currentMonthTransactions = sortedTransactions.filter((item) => {
-    const date = new Date(item.createdAt)
-    const now = new Date()
-
-    return (
-      date.getMonth() === now.getMonth() &&
-      date.getFullYear() === now.getFullYear()
-    )
-  })
-
-  const stats = {
-    sent: currentMonthTransactions.reduce(
-      (sum, item) => sum + item.sendAmount,
-      0,
-    ),
-    total: transactions.length,
-    inProgress: transactions.filter(
-      (item) => item.status === 'in_progress',
-    ).length,
-    received: currentMonthTransactions.reduce(
-      (sum, item) => sum + item.receiveAmount,
-      0,
-    ),
-  }
-
   const filteredTransactions = sortedTransactions.filter(
     (transaction) =>
-      activeFilter === 'all' ||
-      transaction.status === activeFilter,
+      activeFilter === 'all' || transaction.status === activeFilter,
   )
 
   const filterCounts: Record<Filter, number> = {
     all: transactions.length,
-    in_progress: stats.inProgress,
-    completed: transactions.filter(
-      (item) => item.status === 'completed',
-    ).length,
-    failed: transactions.filter(
-      (item) => item.status === 'failed',
-    ).length,
+    in_progress: transactions.filter((item) => item.status === 'in_progress')
+      .length,
+    completed: transactions.filter((item) => item.status === 'completed')
+      .length,
+    failed: transactions.filter((item) => item.status === 'failed').length,
   }
 
   return (
@@ -401,8 +320,6 @@ function RouteComponent() {
             New transfer
           </Link>
         </div>
-
-      
 
         {/* Filters */}
         <div className="mb-5 flex flex-wrap items-center gap-2">
@@ -448,9 +365,7 @@ function RouteComponent() {
                 expanded={expandedId === transaction.id}
                 onToggle={() =>
                   setExpandedId((current) =>
-                    current === transaction.id
-                      ? null
-                      : transaction.id,
+                    current === transaction.id ? null : transaction.id,
                   )
                 }
               />
@@ -468,34 +383,10 @@ function RouteComponent() {
         </section>
 
         <p className="mt-4 text-[11px] text-gray-400">
-          Showing {filteredTransactions.length} of {transactions.length} transfers
+          Showing {filteredTransactions.length} of {transactions.length}{' '}
+          transfers
         </p>
       </main>
     </>
-  )
-}
-
-function Stat({
-  label,
-  value,
-  highlight = false,
-}: {
-  label: string
-  value: string
-  highlight?: boolean
-}) {
-  return (
-    <div className="border-b border-r border-gray-100 px-4 py-4 last:border-r-0 md:border-b-0 md:px-5">
-      <p className="mb-1 text-[9px] font-extrabold text-gray-400">
-        {label}
-      </p>
-      <p
-        className={`text-[17px] leading-tight font-extrabold tracking-[-0.3px] ${
-          highlight ? 'text-primary-600' : 'text-gray-950'
-        }`}
-      >
-        {value}
-      </p>
-    </div>
   )
 }

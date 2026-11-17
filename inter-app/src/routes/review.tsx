@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useState } from 'react'
 import { useTransferSummary } from '#/hooks/useTransferSummary'
@@ -7,17 +7,16 @@ import { useTransactionStore } from '../stores/transaction.store'
 import type { Transaction } from '../lib/types'
 import { Header } from '../components/layout/Header'
 import { TransferStepper } from '#/components/layout/TransferStepper'
-import { useNavigate } from '@tanstack/react-router'
+
 import * as Checkbox from '@radix-ui/react-checkbox'
-import { requireRecipient } from '../lib/route-guards'
 import {
-  Check,
-  ShieldCheck,
-  X,
-  ArrowRight,
-  CheckCircle2,
-} from 'lucide-react'
+  allowSuccessForTransaction,
+  requireRecipient,
+} from '../lib/route-guards'
+import { Check, ShieldCheck, X, ArrowRight, CheckCircle2 } from 'lucide-react'
+
 export const Route = createFileRoute('/review')({
+  ssr: false,
   beforeLoad: requireRecipient,
   component: ReviewPage,
 })
@@ -31,7 +30,11 @@ function ReviewPage() {
     rate,
     currency,
     supported,
+    ratesLoading,
+    ratesError,
+    refetch,
     providers,
+    provider,
     sendAmount,
     receiveAmount,
     fee,
@@ -41,20 +44,11 @@ function ReviewPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isAgreed, setIsAgreed] = useState(false)
 
-  const handleContinue = () => {
-    setIsDialogOpen(true)
-  }
   const addTransaction = useTransactionStore((state) => state.addTransaction)
 
   const speed = useTransferStore((state) => state.speed)
   const handleConfirmTransfer = () => {
-    if (!isAgreed || !recipient || !rate) return
-
-    const selectedProvider = providers.find(
-      (provider) => provider.id === providerId,
-    )
-
-    if (!selectedProvider) return
+    if (!isAgreed || !recipient || !supported || !rate) return
 
     const id = crypto.randomUUID()
 
@@ -73,15 +67,41 @@ function ReviewPage() {
       exchangeRate: rate,
       receiveAmount: receiveAmount,
       receiveCurrency: currency,
-      paymentMethod: selectedProvider.name,
+      paymentMethod: provider.name,
       purpose: recipient.transferPurpose,
       speed: speed,
     }
     addTransaction(transaction)
+    allowSuccessForTransaction(id)
 
     setIsDialogOpen(false)
     navigate({ to: '/success' })
   }
+
+  const rateStatus = ratesLoading
+    ? 'Loading exchange rates...'
+    : ratesError
+      ? supported
+        ? 'Could not refresh exchange rates. Using the last available rate.'
+        : 'Exchange rates could not be loaded. Please retry.'
+      : !supported
+        ? 'This destination currency is not supported by the current exchange-rate provider.'
+        : null
+
+  const rateNotice = rateStatus && (
+    <p className="text-sm text-red-600" role="status">
+      {rateStatus}
+      {!ratesLoading && (
+        <button
+          type="button"
+          className="ml-2 font-semibold underline"
+          onClick={() => void refetch()}
+        >
+          Retry
+        </button>
+      )}
+    </p>
+  )
 
   const heading = (
     <div className="w-full">
@@ -98,157 +118,165 @@ function ReviewPage() {
   return (
     <>
       <Header />
-      <main className="mx-auto w-[min(100%-40px,520px)] md:w-[min(100%-40px,1400px)]">
-        <div className="mx-auto w-full max-w-[720px]">
-          <TransferStepper />
-
-          {heading}
-          
-
-          {/* --- TRANSFER DETAILS --- */}
-          <section className="mb-6">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-semibold text-gray-900">Transfer details</h2>
-            </div>
-            <div className="overflow-hidden rounded-[13px] border border-gray-100 bg-white shadow-sm">
-              <div className="flex flex-col gap-3 p-4 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">You send</span>
-                  <span className="font-semibold">{sendAmount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Transfer fee</span>
-                  <span className="font-semibold">{fee}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Exchange rate</span>
-                  <span className="font-semibold">{rate}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Arrives</span>
-                  <span className="font-semibold text-right">Today</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between border-t border-gray-100 bg-[#f5f8fc] p-4">
-                <span className="font-bold">Total to pay</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-extrabold">{total}</span>
-                  <span className="hidden items-center gap-1 rounded-full bg-[#eaf4ff] px-2 py-0.5 text-[10px] font-bold text-[#1970f0] md:flex">
-                    <Check size={10} strokeWidth={3} /> No hidden fees
-                  </span>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* --- RECIPIENT --- */}
-          <section className="mb-6">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-semibold text-gray-900">Recipient</h2>
-              <button className="flex items-center gap-1 text-sm font-semibold text-[#1970f0] hover:underline">
-              </button>
-            </div>
-            <div className="rounded-[13px] border border-gray-100 bg-white shadow-sm">
-              <div className="flex items-center justify-between border-b border-gray-100 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#eaf4ff] text-sm font-bold text-[#1970f0]">
-                    MS
-                  </div>
-                  <div>
-                    <div className="font-semibold">
-                      {recipient?.recipientFullName}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {recipient?.recipientBankName}
-                    </div>
-                    <div className="mt-1 text-[10px] font-medium text-gray-400 md:hidden">
-                      {recipient?.recipientBankName} ·{' '}
-                      {recipient?.recipientAccountNumber}
-                    </div>
-                  </div>
-                </div>
-                <span className="flex items-center gap-1 rounded-full bg-[#e8f5e9] px-2 py-1 text-[10px] font-bold text-[#34a353]">
-                  <CheckCircle2 size={12} /> Verified
-                </span>
-              </div>
-              <div className="flex flex-col gap-3 p-4 text-sm">
-                <div className="hidden justify-between md:flex">
-                  <span className="text-gray-500">Account number</span>
-                  <span className="font-semibold">
-                    {recipient?.recipientAccountNumber}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Purpose</span>
-                  <span className="font-semibold">
-                    {recipient?.transferPurpose}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Email</span>
-                  <span className="font-semibold">
-                    {recipient?.recipientEmail}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Note</span>
-                  <span className="text-right font-semibold">
-                    {recipient?.recipientNote}
-                  </span>
-                </div>
-                 <div className="flex items-center justify-between border-t border-gray-100 bg-[#f5f8fc] p-4">
-                <span className="font-bold">Total will be sent to recipient</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-extrabold">{currency} {receiveAmount}</span>
-                </div>
-              </div>
-              </div>
-            </div>
-          </section>
-
-          {/* --- PAY FROM --- */}
-          <section className="mb-8">
-            <div className="flex flex-col gap-3">
-              {/* Emirates NBD (Selected) */}
-              <section className="mt-[19px] w-full md:mt-[25px]">
-                <label
-                  className="mb-[6px] flex items-center justify-between gap-3 text-[12px] font-extrabold text-gray-900 md:mb-[7px] md:text-[13px]"
-                  htmlFor="provider"
-                >
-                  Pay From
-                </label>
-                <select
-                  id="provider"
-                  className="min-h-[45px] w-full rounded-[10px] border border-gray-100 bg-white px-[13px] py-0 text-[13px] text-gray-900 contrast-more:border-gray-700 md:min-h-12 md:text-[14px]"
-                  value={providerId}
-                  onChange={(event) => setProviderId(event.target.value)}
-                >
-                  {providers.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-              </section>
-            </div>
-          </section>
-
-          {/* --- CONTINUE BUTTON --- */}
-          <div className="mb-8 flex flex-col gap-3">
-            <button
-              onClick={handleContinue}
-              className="flex h-12 w-full items-center justify-center gap-2 rounded-[13px] bg-[#1970f0] font-semibold text-white transition-colors hover:bg-[#125fd2] md:w-auto md:self-start md:px-8"
-            >
-              Continue <ArrowRight size={18} />
-            </button>
-            <p className="flex items-center justify-center gap-1.5 text-xs text-gray-500 md:justify-start">
-              <ShieldCheck size={14} /> You'll confirm the payment with a
-              one-time code from your bank
-            </p>
-          </div>
-        </div>
-      </main>
       <Dialog.Root open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <main className="mx-auto w-[min(100%-40px,520px)] md:w-[min(100%-40px,1400px)]">
+          <div className="mx-auto w-full max-w-[720px]">
+            <TransferStepper />
+
+            {heading}
+
+            {/* --- TRANSFER DETAILS --- */}
+            <section className="mb-6">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-semibold text-gray-900">
+                  Transfer details
+                </h2>
+              </div>
+              <div className="overflow-hidden rounded-[13px] border border-gray-100 bg-white shadow-sm">
+                <div className="flex flex-col gap-3 p-4 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">You send</span>
+                    <span className="font-semibold">{sendAmount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Transfer fee</span>
+                    <span className="font-semibold">{fee}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Exchange rate</span>
+                    <span className="font-semibold">
+                      {supported ? rate : 'Unavailable'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Arrives</span>
+                    <span className="font-semibold text-right">Today</span>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between border-t border-gray-100 bg-[#f5f8fc] p-4">
+                  <span className="font-bold">Total to pay</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-extrabold">{total}</span>
+                    <span className="hidden items-center gap-1 rounded-full bg-[#eaf4ff] px-2 py-0.5 text-[10px] font-bold text-[#1970f0] md:flex">
+                      <Check size={10} strokeWidth={3} /> No hidden fees
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+            {rateNotice}
+
+            {/* --- RECIPIENT --- */}
+            <section className="mb-6">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-semibold text-gray-900">Recipient</h2>
+              </div>
+              <div className="rounded-[13px] border border-gray-100 bg-white shadow-sm">
+                <div className="flex items-center justify-between border-b border-gray-100 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#eaf4ff] text-sm font-bold text-[#1970f0]">
+                      MS
+                    </div>
+                    <div>
+                      <div className="font-semibold">
+                        {recipient?.recipientFullName}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {recipient?.recipientBankName}
+                      </div>
+                      <div className="mt-1 text-[10px] font-medium text-gray-400 md:hidden">
+                        {recipient?.recipientBankName} ·{' '}
+                        {recipient?.recipientAccountNumber}
+                      </div>
+                    </div>
+                  </div>
+                  <span className="flex items-center gap-1 rounded-full bg-[#e8f5e9] px-2 py-1 text-[10px] font-bold text-[#34a353]">
+                    <CheckCircle2 size={12} /> Verified
+                  </span>
+                </div>
+                <div className="flex flex-col gap-3 p-4 text-sm">
+                  <div className="hidden justify-between md:flex">
+                    <span className="text-gray-500">Account number</span>
+                    <span className="font-semibold">
+                      {recipient?.recipientAccountNumber}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Purpose</span>
+                    <span className="font-semibold">
+                      {recipient?.transferPurpose}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Email</span>
+                    <span className="font-semibold">
+                      {recipient?.recipientEmail}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Note</span>
+                    <span className="text-right font-semibold">
+                      {recipient?.recipientNote}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-gray-100 bg-[#f5f8fc] p-4">
+                    <span className="font-bold">
+                      Total will be sent to recipient
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-extrabold">
+                        {currency} {receiveAmount}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* --- PAY FROM --- */}
+            <section className="mb-8">
+              <div className="flex flex-col gap-3">
+                {/* Emirates NBD (Selected) */}
+                <section className="mt-[19px] w-full md:mt-[25px]">
+                  <label
+                    className="mb-[6px] flex items-center justify-between gap-3 text-[12px] font-extrabold text-gray-900 md:mb-[7px] md:text-[13px]"
+                    htmlFor="provider"
+                  >
+                    Pay From
+                  </label>
+                  <select
+                    id="provider"
+                    className="min-h-[45px] w-full rounded-[10px] border border-gray-100 bg-white px-[13px] py-0 text-[13px] text-gray-900 contrast-more:border-gray-700 md:min-h-12 md:text-[14px]"
+                    value={providerId}
+                    onChange={(event) => setProviderId(event.target.value)}
+                  >
+                    {providers.map((item) => (
+                      <option key={item.id} value={item.id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                </section>
+              </div>
+            </section>
+
+            {/* --- CONTINUE BUTTON --- */}
+            <div className="mb-8 flex flex-col gap-3">
+              <Dialog.Trigger asChild>
+                <button
+                  type="button"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-[13px] bg-[#1970f0] font-semibold text-white transition-colors hover:bg-[#125fd2] md:w-auto md:self-start md:px-8"
+                >
+                  Continue <ArrowRight size={18} />
+                </button>
+              </Dialog.Trigger>
+              <p className="flex items-center justify-center gap-1.5 text-xs text-gray-500 md:justify-start">
+                <ShieldCheck size={14} /> You'll confirm the payment with a
+                one-time code from your bank
+              </p>
+            </div>
+          </div>
+        </main>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
           <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-32px)] max-w-[440px] -translate-x-1/2 -translate-y-1/2 rounded-[20px] bg-white p-6 shadow-xl focus:outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95">
@@ -266,7 +294,10 @@ function ReviewPage() {
                   </Dialog.Description>
                 </div>
               </div>
-              <Dialog.Close className="text-gray-400 hover:text-gray-600">
+              <Dialog.Close
+                aria-label="Close confirmation dialog"
+                className="text-gray-400 hover:text-gray-600"
+              >
                 <X size={20} />
               </Dialog.Close>
             </div>
@@ -295,11 +326,11 @@ function ReviewPage() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Pay from</span>
-                <span className="font-semibold">
-                  {providers.find((item) => item.id === providerId)?.name}
-                </span>
+                <span className="font-semibold">{provider.name}</span>
               </div>
             </div>
+
+            {rateNotice}
 
             <div className="mb-6 flex items-start gap-3">
               <Checkbox.Root
@@ -328,7 +359,7 @@ function ReviewPage() {
               </Dialog.Close>
               <button
                 onClick={handleConfirmTransfer}
-                disabled={!isAgreed}
+                disabled={!isAgreed || !supported}
                 className="flex h-11 flex-[1.5] items-center justify-center gap-2 rounded-[11px] bg-[#1970f0] font-semibold text-white transition-colors hover:bg-[#125fd2] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Yes, send money <ArrowRight size={16} />

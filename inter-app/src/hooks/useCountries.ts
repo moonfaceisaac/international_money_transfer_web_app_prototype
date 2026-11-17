@@ -1,13 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import {
-  getInitialCountries,
-  searchCountries,
-} from '../lib/api/countries'
+import { getInitialCountries, searchCountries } from '../lib/api/countries'
 
-export function useInitialCountries() {
+export function useInitialCountries(enabled = true) {
   return useQuery({
     queryKey: ['countries', 'initial'],
     queryFn: ({ signal }) => getInitialCountries(signal),
+    enabled,
     staleTime: 30 * 60 * 1000,
   })
 }

@@ -22,7 +22,11 @@ export function formatInputAmount(value: string) {
     : groupedInteger
 }
 
-export function convertAmount(amount: number, idrRate: number, direction: 'to' | 'from') {
+export function convertAmount(
+  amount: number,
+  idrRate: number,
+  direction: 'to' | 'from',
+) {
   if (!Number.isFinite(amount) || !Number.isFinite(idrRate) || idrRate <= 0) {
     return 0
   }

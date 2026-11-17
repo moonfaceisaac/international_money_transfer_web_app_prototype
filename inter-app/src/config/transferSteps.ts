@@ -5,4 +5,3 @@ export const transferSteps = [
 ] as const
 
 export type TransferStepId = (typeof transferSteps)[number]['id']
-

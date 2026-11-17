@@ -6,4 +6,3 @@ export const banks: RecipientBank[] = [
   { id: '3', name: 'Bank International 3' },
   { id: '4', name: 'Bank International 4' },
 ]
-

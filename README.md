@@ -1,37 +1,57 @@
-# Inter is the name for the international money transfer web app protoype.
+### Inter is the name for the international money transfer web app protoype.
+
+Inter is available through vercel app, you can immidiately access it by this url:
+
+https://inter-app.vercel.app
+
+please do follow the instruction below to access it via your own local environment.
 
 ## How to install and run the app
 Inter is an international money transfer web app prototype built as part of the Topremit take-home project.
 
 How to Install and Run the App
 
-Prerequisites
+1. Prerequisites
 
-Node.js and npm installed on your machine.
+- Node.js and npm installed on your machine.
 
-Git (if cloning the repository).
+- Git (if cloning the repository).
 
-Installation
+2. Installation
 
-Clone the repository:
-
+- Clone the repository:
+```cmd
 git clone <repository-url>
-
-Navigate to the project directory:
-
+```
+- Navigate to the project directory:
+```cmd
 cd inter-app
-
-Install the dependencies:
-
+```
+- Install the dependencies:
+```cmd
 npm install
+```
 
-Run the Development Server
+3. Configure the required environment variables.
 
-Start the development server:
+- Create a .env file in the project root.
 
+- Copy the contents of .env.example into .env.
+```cmd
+cp .env.example .env
+```
+
+4. Fill in the required API credentials.
+Reviewer's API key have been given by email
+
+5. Run the Development Server
+```cmd
 npm run dev
+```
 
 The application will be available at:
+
+
 
 http://localhost:3000
 ## Which stack I picked and why
@@ -42,16 +62,16 @@ http://localhost:3000
 | Validation | Zod |
 
 Reasoning why I picked the said stacks:
--One of the required tech stack was TanStack Query, Thus i thought uses TanStack Start would compliment it
+- One of the required tech stack was TanStack Query, Thus i thought uses TanStack Start would compliment it
 better
--I never used TanStack Router before, I assume Topremit uses both Next.js & TanStack, Thus i choose to utilize this take-home project as a chance to learn
--I'm not too familiar with using Chakra UI v3 to style as opposed to Tailwind. I believe styling framework sometimes has a much bigger learning curve, therefore this time I choose something thats more comfortable
+- I never used TanStack Router before, I assume Topremit uses both Next.js & TanStack, Thus i choose to utilize this take-home project as a chance to learn
+- I'm not too familiar with using Chakra UI v3 to style as opposed to Tailwind. I believe styling framework sometimes has a much bigger learning curve, therefore this time I choose something thats more comfortable
 
 
 
 ## Choices I made where the task was unclear
--I was a little bit confused or atleast misunderstood on having only to choose what type of service in calculator page without immidiately give users the chance to pick which providers of said services to choose aswell in the same page. Initially I allowed the user to immidiately choose the provider in calculator but then changed my mind to make it into the review page to stay more align towards the requirement described in the take home project document. 
--Transaction status was also something that i ponder for quite some time, I Chose to have them split into three values (i.e in progress, completed, and failed). I decided to do that because, i think international transfer took some more time than normal money transfer, thus it makes more sense if user prompted with an on progress status having after just clicked continue off of review page, In which later they will find out it is now completed after navigating to history page. Not only that, i think this is just more interesting visually.
+- I was a little bit confused or atleast misunderstood on having only to choose what type of service in calculator page without immidiately give users the chance to pick which providers of said services to choose aswell in the same page. Initially I allowed the user to immidiately choose the provider in calculator but then changed my mind to make it into the review page to stay more align towards the requirement described in the take home project document. 
+- Transaction status was also something that i ponder for quite some time, I Chose to have them split into three values (i.e in progress, completed, and failed). I decided to do that because, i think international transfer took some more time than normal money transfer, thus it makes more sense if user prompted with an on progress status having after just clicked continue off of review page, In which later they will find out it is now completed after navigating to history page. Not only that, i think this is just more interesting visually.
 
 ## What I'd improve with more time
 - Two Languages
